@@ -51,6 +51,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     interface TileListener {
         void onTileFocused(int position, View card);
 
+        void onTileOptionsRequested(Entry entry, View card);
+
         /** Called for a D-pad direction key on a tile. Return true when handled (focus stays put). */
         boolean onTileVerticalKey(int position, int keyCode);
 
@@ -437,6 +439,10 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {
+            if (showLibrary && e.kind == Entry.APP) {
+                listener.onTileOptionsRequested(e, v);
+                return true;
+            }
             Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + e.pkg));
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             try {
@@ -483,6 +489,13 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     int appCount() { return items.size(); }
+
+    Entry entryAt(int position) {
+        return position >= 0 && position < items.size() ? items.get(position) : null;
+    }
+
+    // A removal needs an on-TV way to add the shortcut back.
+    boolean homeOptionsEnabled() { return showLibrary; }
 
     boolean isLibraryAt(int position) { return showLibrary && position == items.size(); }
 

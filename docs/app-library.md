@@ -26,6 +26,33 @@ Every checked app can be removed from Home, including the theme’s default apps
 It stays installed and remains in the library, where one press adds it back.
 There is no hidden-app section and no uninstall action.
 
+## Manage a shortcut from Home
+
+With the app library enabled, select an ordinary Home app and **hold OK** or
+press the remote's **Menu** key. The shortcut menu offers Reorder apps, Remove
+from Home and App info. A normal OK press still opens the app. Back dismisses
+the menu without changing anything. Module cards and the default-Home settings
+tile retain their previous behavior.
+
+Removing an app hides its Home shortcut, including a theme default or a manually
+added shortcut. It stays installed. Open the app library and press OK on that
+app to add it back. This uses the same saved choices as the library's own menu;
+it does not edit the theme or uninstall anything. The menu uses the existing
+translated labels and guards against the OK-up event that opened it activating
+its first action.
+
+The Home menu is available only while `app_library` is enabled, so there is
+always an on-TV path to add a removed shortcut back. With the library disabled,
+Home long-press still opens App info as before, and Menu is not intercepted.
+
+Tested on a Haier `HRA962X2_2G_ALI6G_A` (API 28), in a local build with the
+library enabled: long-press and Menu both opened the menu, a shortcut could be
+removed while its app stayed installed, the library added it back, and reorder
+mode could be entered and cancelled. The screenshot shows that local build;
+its Haier-specific Home/settings adaptations are separate from this feature.
+
+![Home shortcut menu on the tested TV](home-shortcut-menu.png)
+
 Choices are stored in the launcher’s private `library_apps.txt` and
 `library_home_removed.txt`, with at most 128 entries in each. Each file is written
 atomically. An unreadable file is left unchanged if an edit fails. Choices

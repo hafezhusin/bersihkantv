@@ -890,6 +890,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (handleSettingsKey(event)) return true;
+        if (!reordering && adapter.homeOptionsEnabled() && openPopup == null
+                && event.getKeyCode() == KeyEvent.KEYCODE_MENU) {
+            AppAdapter.Entry entry = adapter.entryAt(focusedTilePosition());
+            if (entry != null && entry.kind == AppAdapter.Entry.APP) {
+                if (event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled()) {
+                    onTileOptionsRequested(entry, getCurrentFocus());
+                }
+                return true;
+            }
+        }
         if (!reordering) return super.dispatchKeyEvent(event);
         if (dockEditing) return dispatchDockEdit(event);
         boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
@@ -2458,6 +2468,43 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     // ---- launcher settings and module cards -------------------------------------------------------
+
+    /** Shortcut management belongs beside the shortcut, using the same persistent choices as the library. */
+    @Override
+    public void onTileOptionsRequested(AppAdapter.Entry entry, View card) {
+        if (!adapter.homeOptionsEnabled() || reordering || openPopup != null || entry.kind != AppAdapter.Entry.APP) return;
+        View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
+        LinearLayout rows = panel.findViewById(R.id.rows);
+        PopupWindow popup = glassPopup(panel, (int) (260 * density));
+        TextView heading = new TextView(this);
+        heading.setText(entry.label);
+        heading.setTextColor(0xFFFFFFFF);
+        heading.setTextSize(18);
+        heading.setSingleLine(true);
+        heading.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        heading.setPadding((int) (18 * density), (int) (12 * density), (int) (18 * density), (int) (10 * density));
+        rows.addView(heading);
+        addSettingsMenuRow(rows, popup, R.string.reorder, this::toggleReorder);
+        addSettingsMenuRow(rows, popup, R.string.library_remove_shortcut, () -> {
+            if (!LibraryApps.save(this, entry.pkg, false)) {
+                Toast.makeText(this, R.string.library_save_failed, Toast.LENGTH_LONG).show();
+                return;
+            }
+            reloadTiles();
+            restoreFocus();
+            Toast.makeText(this, R.string.library_remove_shortcut, Toast.LENGTH_SHORT).show();
+        });
+        addSettingsMenuRow(rows, popup, R.string.library_app_info, () -> {
+            try {
+                startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.parse("package:" + entry.pkg)));
+            } catch (ActivityNotFoundException | SecurityException unavailable) {
+                Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
+            }
+        });
+        popup.showAtLocation(root, Gravity.CENTER, 0, 0);
+        rows.getChildAt(1).requestFocus();
+    }
 
     /** Keep a normal Settings click for the TV; the launcher's choices live behind hold OK. */
     private void showSettingsMenu() {
