@@ -81,6 +81,31 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
 - **Play Protect blocked the launcher** ("unsafe app blocked, built for an older version of Android")
   and `pm install` hung, then failed with `INSTALL_FAILED_VERIFICATION_FAILURE`, while it targeted
   SDK 29. It targets 34 now; if you built an old checkout, rebuild.
+- **Every sideload ends in `INSTALL_FAILED_VERIFICATION_FAILURE`, launcher or not**, on China TCL /
+  FFalcon MT5879 sets (`tcl_mt5879_cn`). There the refusal is a verification step in front of
+  `pm install`, not a parse or signature error in the APK, so the install can be let through by
+  taking the verifier out of the loop for the length of one install
+  ([#376](https://github.com/Gathin23/cleanyourtv/issues/376), reported on a FFalcon 75R685C,
+  `tcl_mt5879_cn`, Android 11, `RQ3A.210705.001`; the same gate and log lines are in
+  `examples/tcl-q10g-pro/debloat.txt`):
+  ```sh
+  tools/tv.py 'pm disable-user --user 0 com.android.packageinstaller'
+  tools/tv.py 'pm install -r /data/local/tmp/aerial.apk'
+  tools/tv.py 'pm enable com.android.packageinstaller'
+  ```
+  Push the APK first (`--push`, or `tools/b64push.py` for a large one); these are the same three
+  shell commands the report gives as `adb shell` lines.
+  `pm install` answered `Success` for an APK declaring `MAIN`+`HOME` and for one that does not, and
+  after the re-enable `pm list packages -d` showed `com.android.packageinstaller` enabled again,
+  with installs, updates and a full `reboot` back to normal on that unit. Nothing is patched and no
+  property is changed: only the verifier process is skipped, which is why this is a fallback for a
+  set where the store or a USB stick was the only other way in, not a first choice.
+  **The re-enable is not optional and belongs in the same script**, with nothing in between: while
+  `com.android.packageinstaller` is disabled the TV can install and uninstall nothing at all, so an
+  interrupted window has to be closed with `pm enable` over ADB before the set is usable again.
+  Installing is not owning Home either — on this family the firmware still boots `com.tcl.cyberui`
+  until the two TCL-only app ops are allowed (`appops set <pkg> APP_AUTO_START allow` and
+  `APP_ASSOC_START allow`), seen on that 75R685C and on a TCL G03 in the same issue.
 - **Screenshots come out empty** while Live TV, an HDMI input or Netflix is on screen, seen on TCL
   and a [Sony KDL-49W800G](https://github.com/Gathin23/cleanyourtv/issues/92). Press Home before
   `screencap`. An empty capture means nothing about the ADB connection or playback; check those

@@ -81,6 +81,14 @@ Launcher
   declares `android.intent.category.HOME` unless it carries the manufacturer's signature. If you
   hit either, do the debloat half, say plainly that the launcher half is impossible here, and stop
   retrying installs. The matching `examples/` header says which case your TV is.
+- Before you call the launcher half impossible on a China TCL or FFalcon set, check whether the
+  refusal is the verifier rather than the signature: on `tcl_mt5879_cn` firmware,
+  `pm disable-user --user 0 com.android.packageinstaller` around a single `pm install` lets even a
+  HOME-declaring APK through, with `pm enable com.android.packageinstaller` in the same script and
+  nothing in between, because the TV installs nothing while it is disabled. That is
+  [#376](https://github.com/Gathin23/cleanyourtv/issues/376), written up with the caveats in
+  `docs/TROUBLESHOOTING.md`; try it once rather than assuming, and if it fails there is nothing
+  more to retry on that set.
 - Don't install a third-party launcher that charges for basics like wallpapers. Build a small native
   Android TV launcher instead (Java, AndroidX RecyclerView, minSdk matching the TV, debug build is fine),
   install it over ADB, set it as the default home and disable the stock launcher. If several apps claim

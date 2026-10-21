@@ -29,6 +29,12 @@
 # InstallConfig, readable with `content query --uri content://com.tcl.providers.config/all`
 # (project_id=InstallConfig) and not writable from the shell.
 #
+# On the sibling FFalcon 75R685C on this same tcl_mt5879_cn platform, putting
+# com.android.packageinstaller out of the loop for the length of one `pm install` skipped that
+# verifier: both a HOME-declaring and a plain APK installed, and installs, updates and a reboot were
+# normal again after the re-enable. Not tried on this 55Q10G Pro itself; the three commands, the
+# re-enable that must follow them and the caveats are in docs/TROUBLESHOOTING.md (#376).
+#
 # Sideloading is blocked for everything else too, not just launchers. On this unit `adb install`,
 # `pm install`, `pm install-commit` and launching the exported InstallStart activity by hand all
 # end in INSTALL_FAILED_VERIFICATION_FAILURE — including an APK signed by TCL itself, and with
