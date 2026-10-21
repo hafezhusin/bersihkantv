@@ -293,7 +293,9 @@ powershell -ExecutionPolicy Bypass -File tools\disable.ps1 -TvHost 192.168.1.50 
 
 The install scripts ask the TV which launcher owns Home and only disable one they recognise
 (`tvlauncher` or `launcherx`); pass `STOCK_LAUNCHER=<package>` (`-StockLauncher`) to override, or
-`none` to leave it alone.
+`none` to leave it alone. `launcher/build-and-install.sh --status` prints the current owner, the exact
+component it would restore and the supported modes as JSON without changing anything; the contract is
+[`docs/specs/home-handover.md`](docs/specs/home-handover.md).
 
 `tools/disable.sh` (`disable.ps1`) applies the same rule before it disables anything: if the list
 contains the app that owns Home and no other app on the TV answers HOME, it skips that entry, says

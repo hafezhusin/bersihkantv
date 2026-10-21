@@ -3,6 +3,72 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 : "${TV_HOST:?set TV_HOST to the TV IP address, e.g. TV_HOST=192.168.1.50 $0}"
+TOOLS="$(cd ../tools && pwd)"   # absolute, so the venv's Python doesn't warn about "../" in its prefix
+PY=$TOOLS/venv/bin/python
+[ -x "$PY" ] || PY=$TOOLS/venv/Scripts/python.exe
+export MSYS_NO_PATHCONV=1
+
+HOME_QUERY='cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
+# Which app owns Home differs by build (com.google.android.tvlauncher on Android TV,
+# com.google.android.apps.tv.launcherx on newer Google TV), so ask the TV instead of guessing.
+# Only a launcher we recognise is accepted: the answer can also be Android's chooser ("android"),
+# the setup wizard, or another third-party launcher, none of which should be disabled by accident.
+# Pass STOCK_LAUNCHER=<package> to name it yourself, or STOCK_LAUNCHER=none to disable nothing.
+KNOWN_STOCK_LAUNCHERS="com.google.android.tvlauncher com.google.android.apps.tv.launcherx com.google.android.leanbacklauncher com.mitv.tvhome"
+
+# Home's owner, or an empty string when the TV cannot be reached (pipefail would otherwise make a
+# lost connection abort the script with no explanation).
+query_home() {
+  "$PY" -I "$TOOLS/tv.py" "$HOME_QUERY" 2>/dev/null | tail -n 1 | tr -d '\r' || true
+}
+
+query_claimants() {
+  "$PY" -I "$TOOLS/tv.py" 'cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME' \
+    | tr -d '\r' | grep -o '[A-Za-z0-9_.]*/' | tr -d / | sort -u || true
+}
+
+recovery_file() {
+  printf '%s/cleanyourtv-handover-%s.txt' "${HOME:-$PWD}" \
+    "$(printf '%s' "$TV_HOST" | tr -c 'A-Za-z0-9._-' '_')"
+}
+
+# JSON string literal, including the empty one: sed alone emits nothing for empty input, which would
+# produce invalid JSON such as "prior_component": instead of "prior_component":"".
+json_string() {
+  printf '"%s"' "$(printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+}
+
+# Read-only contract output for the companion: current owner, exact component and supported modes.
+# It never installs, disables, enables or sets anything.
+if [ "${1:-}" = --status ]; then
+  CURRENT=$(query_home)
+  case "$CURRENT" in
+    com.gathin.tvhome/*) OWNER=new ;;
+    android) OWNER=chooser ;;
+    "") OWNER=unknown ;;
+    *)
+      PKG=${CURRENT%%/*}
+      case " $KNOWN_STOCK_LAUNCHERS " in
+        *" $PKG "*) OWNER=stock ;;
+        *) OWNER=other ;;
+      esac ;;
+  esac
+  PRIOR=""
+  [ "$OWNER" = stock ] && PRIOR=$CURRENT
+  REC=$(recovery_file)
+  if [ -f "$REC" ]; then REC_EXISTS=true; else REC_EXISTS=false; fi
+  printf '{"new_package":"com.gathin.tvhome","new_component":"com.gathin.tvhome/.MainActivity",'
+  printf '"home":{"component":%s,"package":%s,"owner":"%s"},' \
+    "$(json_string "$CURRENT")" "$(json_string "${CURRENT%%/*}")" "$OWNER"
+  printf '"stock":{"launcher":"%s","prior_component":%s},' \
+    "$([ "$OWNER" = stock ] && printf '%s' "${CURRENT%%/*}")" \
+    "$(json_string "$PRIOR")"
+  printf '"modes":["takeover","leave-stock-alone","restore-prior-owner"],'
+  printf '"recovery":{"file":"%s","exists":%s}}' "$REC" "$REC_EXISTS"
+  printf '\n'
+  exit 0
+fi
+
 # macOS: java_home or Homebrew; Linux: the java on PATH.
 export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 17 2>/dev/null || { [ -d /opt/homebrew/opt/openjdk@17 ] && echo /opt/homebrew/opt/openjdk@17; } || java -XshowSettings:properties -version 2>&1 | awk '/java.home/ {print $3}')}"
 # Android Studio's default SDK location on macOS, then on Linux, then Homebrew's command-line tools.
@@ -11,21 +77,14 @@ export ANDROID_HOME="${ANDROID_HOME:-/opt/homebrew/share/android-commandlinetool
 export PATH="$JAVA_HOME/bin:$PATH"
 [ -f local.properties ] || echo "sdk.dir=$ANDROID_HOME" > local.properties
 ./gradlew assembleRelease -q --console=plain
-TOOLS="$(cd ../tools && pwd)"   # absolute, so the venv's Python doesn't warn about "../" in its prefix
-PY=$TOOLS/venv/bin/python
-[ -x "$PY" ] || PY=$TOOLS/venv/Scripts/python.exe
-export MSYS_NO_PATHCONV=1
-# Which app owns Home differs by build (com.google.android.tvlauncher on Android TV,
-# com.google.android.apps.tv.launcherx on newer Google TV), so ask the TV instead of guessing.
-# Only a launcher we recognise is accepted: the answer can also be Android's chooser ("android"),
-# the setup wizard, or another third-party launcher, none of which should be disabled by accident.
-# Pass STOCK_LAUNCHER=<package> to name it yourself, or STOCK_LAUNCHER=none to disable nothing.
-KNOWN_STOCK_LAUNCHERS="com.google.android.tvlauncher com.google.android.apps.tv.launcherx com.google.android.leanbacklauncher com.mitv.tvhome"
+
+ORIGINAL_HOME=$(query_home)
 if [ -z "${STOCK_LAUNCHER:-}" ]; then
-  HOME_PKG=$("$PY" -I ../tools/tv.py 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME' \
-    | tail -n 1 | tr -d '\r' | cut -d/ -f1) || {
+  HOME_PKG=${ORIGINAL_HOME%%/*}
+  if [ -z "$ORIGINAL_HOME" ]; then
     echo "ERROR: could not ask the TV which launcher owns Home. Check TV_HOST and the debugging prompt on the TV," >&2
-    echo "or pass STOCK_LAUNCHER=<package> yourself." >&2; exit 1; }
+    echo "or pass STOCK_LAUNCHER=<package> yourself." >&2; exit 1
+  fi
   case " $KNOWN_STOCK_LAUNCHERS " in
     *" $HOME_PKG "*) STOCK_LAUNCHER=$HOME_PKG ;;
     *)
@@ -35,8 +94,7 @@ if [ -z "${STOCK_LAUNCHER:-}" ]; then
         # Android's chooser: two or more launchers tie and no default is set, which is where a TV lands
         # after tools/restore.sh followed by a re-applied list. Take the one known stock launcher among
         # the HOME claimants, if there is exactly one.
-        CLAIMANTS=$("$PY" -I ../tools/tv.py 'cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME' \
-          | tr -d '\r' | grep -o '[A-Za-z0-9_.]*/' | tr -d / | sort -u)
+        CLAIMANTS=$(query_claimants)
         FOUND=""; N=0
         for k in $KNOWN_STOCK_LAUNCHERS; do
           if printf '%s\n' "$CLAIMANTS" | grep -qx "$k"; then FOUND=$k; N=$((N + 1)); fi
@@ -57,7 +115,23 @@ if [ -z "${STOCK_LAUNCHER:-}" ]; then
   esac
 fi
 echo "Stock launcher: $STOCK_LAUNCHER"
-HOME_QUERY='cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
+# Restore must name the exact component, not just the package: Android 9's set-home-activity needs
+# pkg/activity, and a package can expose more than one HOME activity. Prefer the component that owned
+# Home at the start; otherwise resolve the package once, before anything is disabled.
+STOCK_COMPONENT=""
+if [ "$STOCK_LAUNCHER" != none ]; then
+  case "$ORIGINAL_HOME" in
+    "$STOCK_LAUNCHER"/*) STOCK_COMPONENT=$ORIGINAL_HOME ;;
+    *) STOCK_COMPONENT=$("$PY" -I "$TOOLS/tv.py" \
+         "cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME $STOCK_LAUNCHER" \
+         2>/dev/null | tail -n 1 | tr -d '\r' || true) ;;
+  esac
+  case "$STOCK_COMPONENT" in
+    "$STOCK_LAUNCHER"/*) echo "Restore component: $STOCK_COMPONENT" ;;
+    *) echo "ERROR: could not resolve the exact Home component for $STOCK_LAUNCHER; nothing was changed." >&2
+       echo "Pass STOCK_LAUNCHER=none to leave Home alone." >&2; exit 1 ;;
+  esac
+fi
 if [ "$STOCK_LAUNCHER" = none ]; then DISABLE_STOCK="echo stock launcher left alone"
 else DISABLE_STOCK="pm disable-user --user 0 $STOCK_LAUNCHER"; fi
 APK=app/build/outputs/apk/release/app-release.apk
@@ -89,12 +163,6 @@ printf '%s\n' \
   "cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity" \
   | "$PY" -I ../tools/tv.py --batch
 
-# Home's owner, or an empty string when the TV cannot be reached (pipefail would otherwise make a
-# lost connection abort the script with no explanation).
-query_home() {
-  "$PY" -I ../tools/tv.py "$HOME_QUERY" 2>/dev/null | tail -n 1 | tr -d '\r' || true
-}
-
 # Put the stock launcher back and check that it took. A TV whose new Home does not start can only be
 # rescued over ADB, so the commands go into a local file as well: when it is the connection that
 # broke, the terminal that ran this script may never come back.
@@ -103,18 +171,19 @@ rollback_home() {
     echo "ERROR: Home is not the new launcher, and no stock launcher was disabled; nothing to roll back." >&2
     return 1
   fi
-  "$PY" -I ../tools/tv.py "pm enable --user 0 $STOCK_LAUNCHER" >/dev/null 2>&1 || true
-  # set-home-activity needs pkg/activity on Android 9, so resolve the component on the TV first.
-  "$PY" -I ../tools/tv.py "cmd package set-home-activity --user 0 \$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME $STOCK_LAUNCHER | tail -n 1)" >/dev/null 2>&1 || true
+  "$PY" -I "$TOOLS/tv.py" "pm enable --user 0 $STOCK_LAUNCHER" >/dev/null 2>&1 || true
+  "$PY" -I "$TOOLS/tv.py" "cmd package set-home-activity --user 0 $STOCK_COMPONENT" >/dev/null 2>&1 || true
   BACK=$(query_home)
   case "$BACK" in
-    "$STOCK_LAUNCHER"/*) echo "$STOCK_LAUNCHER owns Home again." >&2; return 0 ;;
+    "$STOCK_COMPONENT") echo "$STOCK_COMPONENT owns Home again." >&2; return 0 ;;
+    "$STOCK_LAUNCHER"/*) echo "$STOCK_LAUNCHER owns Home again, but not the exact prior component $STOCK_COMPONENT." >&2
+      return 1 ;;
   esac
-  REC="${HOME:-$PWD}/cleanyourtv-handover-$(printf '%s' "$TV_HOST" | tr -c 'A-Za-z0-9._-' '_').txt"
+  REC=$(recovery_file)
   {
     echo "# cleanyourtv: the launcher handover on $TV_HOST did not finish. From the repo root:"
     echo "TV_HOST=$TV_HOST tools/tv.py 'pm enable --user 0 $STOCK_LAUNCHER'"
-    echo "TV_HOST=$TV_HOST tools/tv.py 'cmd package set-home-activity --user 0 \$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME $STOCK_LAUNCHER | tail -n 1)'"
+    echo "TV_HOST=$TV_HOST tools/tv.py 'cmd package set-home-activity --user 0 $STOCK_COMPONENT'"
     echo "# then check: TV_HOST=$TV_HOST tools/tv.py '$HOME_QUERY'"
   } > "$REC" 2>/dev/null || REC=""
   echo "ERROR: recovery is incomplete; Home still resolves to '${BACK:-nothing}'." >&2
