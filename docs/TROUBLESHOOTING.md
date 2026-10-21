@@ -120,6 +120,17 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   launcher that cannot be installed, not the lists. If the `Failure [...]` line names
   `INSTALL_FAILED_VERIFICATION_FAILURE` instead, that is the bullet above - the firmware's installer
   verifier, not the API level.
+- **A China TCL/FFalcon set refuses an install it should accept**: this firmware keeps its own install
+  policy in a content provider, `content://com.tcl.providers.config/InstallConfig`, and that row - not
+  the installer, not `verifier_verify_adb_installs` - decides which packages pass and which strategies
+  run ([#743](https://github.com/Gathin23/cleanyourtv/issues/743)). Read it before concluding the
+  launcher cannot be installed:
+  `tools/tv.py 'content query --uri content://com.tcl.providers.config/InstallConfig'`.
+  On one Android 11 unit the row took a write, and a package added to `launcherStrategy.packages` with
+  `pmStrategy` off installed; on the Android 14 MT9655 sets the same write is ignored and the answer
+  stays "debloat only". A write has to be restored to the exact original string and read back, and a
+  failed restore is a failure even when the APK installed: the transaction, the `--bind` escaping and
+  the failure boundaries are in [the policy note](devices/tcl-installconfig-policy.md).
 - **Screenshots come out empty** while Live TV, an HDMI input or Netflix is on screen, seen on TCL
   and a [Sony KDL-49W800G](https://github.com/Gathin23/cleanyourtv/issues/92). Press Home before
   `screencap`. An empty capture means nothing about the ADB connection or playback; check those

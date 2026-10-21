@@ -89,7 +89,13 @@ Launcher
   installer and even the manufacturer's own APKs all fail — and others refuse any package that
   declares `android.intent.category.HOME` unless it carries the manufacturer's signature. If you
   hit either, do the debloat half, say plainly that the launcher half is impossible here, and stop
-  retrying installs. The matching `examples/` header says which case your TV is.
+  retrying installs. The matching `examples/` header says which case your TV is. Before you call it
+  impossible on a China-market TCL/FFalcon set, read that firmware's own install policy — it decides
+  which packages and strategies it allows, and on one Android 11 unit putting the package into
+  `launcherStrategy.packages` for the install was enough:
+  `tools/tv.py 'content query --uri content://com.tcl.providers.config/InstallConfig'`. Restore the
+  original string exactly after the install and never leave it modified
+  (`docs/devices/tcl-installconfig-policy.md`).
 - Check the TV's SDK level before promising the launcher, too: `tools/tv.py 'getprop
   ro.build.version.sdk'` against `grep minSdk launcher/app/build.gradle` (26 = Android 8.0). A set
   below it answers `INSTALL_FAILED_OLDER_SDK`; lowering `minSdk` is a source change you would then

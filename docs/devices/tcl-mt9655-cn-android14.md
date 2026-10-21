@@ -115,15 +115,20 @@ content query --uri content://com.tcl.providers.config/all | grep InstallConfig
 ```
 
 `launcherStrategy` is enabled with an **empty allowlist**, so a HOME package is only accepted if it
-is signed with `com.tcl.cyberui`'s key. The row is read-only from the shell:
+is signed with `com.tcl.cyberui`'s key. The row stayed read-only from the shell here:
 
 - `content update` on it returns 0 and silently ignores the write (verified by rewriting the
   `Version` row and reading the old value back);
-- the `content` CLI splits `--bind` on every `:`, so a JSON value cannot be passed at all;
+- `--bind` cannot be passed naively, because the `content` CLI splits the value on every `:` — that is
+  a quoting problem rather than a closed door: on another TCL firmware
+  ([MT5879, Android 11](tcl-installconfig-policy.md),
+  [#743](https://github.com/Gathin23/cleanyourtv/issues/743)) the same write is accepted once the
+  backslashes are escaped before the colons. Here it was refused outright, as the bullet above says;
 - `/data/user_de/0/com.tcl.providers.config/databases/` is not readable as `shell`.
 
 So on this generation the honest summary is: **debloat only**. Replacing Home needs a TCL-signed
-build, root, or a firmware downgrade.
+build, root, or a firmware downgrade. Whether filling the allowlist would have lifted the signature
+refusal above is untested: the write never landed, so nobody knows.
 
 The stock launcher (`com.tcl.cyberui`) also renders its own home-screen cards and promo banner from
 inside the app, so those cannot be removed by disabling packages either — `com.tcl.atomic.servicecenter`
