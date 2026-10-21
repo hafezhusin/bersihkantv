@@ -312,7 +312,10 @@ tools/tv.py 'dumpsys accessibility'
   nothing even when the real Input button works.
 - **Which keycode** a dead button sends: `dumpsys window policy` lists the "global keys" Android routes
   to one app (on Google TV several go to launcherx, which is disabled), and Xiaomi firmware logs every
-  press as `handleAction<keycode>` in `logcat`. Put it in `input_key_keycodes` (opens Inputs) or
+  press as `handleAction<keycode>` in `logcat`. TCL Google TV firmware logs it as
+  `TclPhoneWindowManager: handleKeyBeforeQueueing, key = 4099, down = true` (a TCL 55C728, Google TV 11);
+  read the log straight after the press, as its main buffer there holds well under a minute.
+  Put it in `input_key_keycodes` (opens Inputs) or
   `app_keys` (`keycode:package`), reinstall with `INPUT_KEY_SERVICE=1` and press the real button.
   A press that `logcat` reports as `KEY_UNKNOWN` or `KEY_PROGRAM` cannot be matched by keycode at all,
   because every unmapped button shares those codes: use the Linux scancode from
