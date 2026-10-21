@@ -1,0 +1,64 @@
+# TCL 55Q750G, US (device G05, model "Smart TV Pro", product G05_4K_US, board C05, MediaTek MT5889)
+# Google TV, Android 11 (SDK 30), firmware AR2101, software AR71, 2.7 GB RAM. On Wi-Fi.
+# The same firmware build as examples/tcl-g05-google-tv (software AR68 there), and this time with the launcher:
+# launcherx and setupwraith are off for the Clean Your TV launcher, and Home stayed with it after a reboot.
+#
+# Tested on one set from 21 October 2026. Disabled with `pm disable-user --user 0`, one call each, in four batches
+# with a screenshot after each. Reboot-checked twice: everything stayed disabled except com.tcl.usercenter and
+# com.tcl.smartalexa, which the firmware re-enables at every boot (left in the list so restore.sh covers them).
+# Home, the D-pad, the Input key, Live TV and HDMI 1 from the launcher's Inputs menu, and YouTube playback checked.
+#
+# Apply:   TV_HOST=<tv ip> tools/disable.sh examples/tcl-55q750g-google-tv/debloat.txt
+#          On Wi-Fi, check `dumpsys wifi | grep -o 'cname=[^ ]*'` first: here the network saved during first setup
+#          belonged to setupwraith, so disable.sh skips it until the network is forgotten and re-joined in Settings
+#          (it then belongs to com.android.tv.settings). launcherx goes later, in build-and-install.sh (README).
+# Undo:    TV_HOST=<tv ip> tools/restore.sh examples/tcl-55q750g-google-tv/debloat.txt com.google.android.apps.tv.launcherx
+# Everything is DISABLED, not uninstalled. Comment out any line you want to keep.
+#
+# Stock launcher: com.google.android.apps.tv.launcherx. Live TV / HDMI app: com.tcl.tv (.TVActivity); HDMI goes
+# through com.tcl.tvinput's passthrough input.
+# Left enabled because the TV needs them: com.tcl.tv, com.tcl.tvinput, com.tcl.suspension (the Input key's source
+# panel, .ui.main.InputActivity; examples/tcl-g05-google-tv disables it and loses the key), com.tcl.settings,
+# com.tcl.system.server, com.tcl.keyhelp, com.tcl.autopair, com.tcl.tcl_bt_rcu_service (remote),
+# com.tcl.providers.config, com.tcl.eva (RemoterService), the keyboard, Play Store and Play Services.
+# Left enabled by the owner's choice: com.tcl.ttvs - on this set it holds the TCL firmware updater
+# (versionUpdateApp ... SystemUpdateActivity) as well as BI analytics, Samba TV ACR (SambaVideoService) and T-Cast,
+# so keeping updates keeps all of it; Google Assistant (katniss, tv.assistant), Chromecast (mediashell), AirPlay
+# (com.tcl.airplay2, com.mediatek.AirplayAPK), game bar, USB media player, YouTube Music, dreamx, and the streaming
+# apps in use.
+# Not touched because what they do is unclear: com.tcl.partnercustomizer (asks START_CHECK_SYSTEMUPDATE),
+# com.tcl.micmanager, com.mediatek.backgrounddetection, com.tcl.externaldevice.update.
+# Never launch com.tcl.factory.view.
+# None of the listed packages requests TV_INPUT_HARDWARE.
+
+# Telemetry and Google feedback
+com.tcl.guard                          # TGuard: device-use tracking, "health info", memory cleaner
+com.google.android.feedback
+
+# TCL content, ad and promo services
+com.tcl.tv.plus                        # TCL TV+ content app
+com.tcl.channelplus                    # TCL Live FAST channels
+com.tcl.tv.tclchannel                  # TCL Channel, bundles Google Mobile Ads
+com.tcl.waterfall.overseas             # TCL content "waterfall" recommendations
+com.tcl.messagebox                     # TCL pushed messages and promos
+com.tcl.usercenter                     # TCL account sign-in; re-enabled by the firmware at every boot
+com.tcl.esticker                       # retail-demo sticker
+android.autoinstalls.config.google.gtvpai   # Google partner auto-installs
+
+# Preloads, TCL voice and Alexa
+com.tcl.dashboard                      # "TCL Home" panel, gift box and promos; no remote button needed it
+com.tcl.ocean.instructions             # e-manual
+com.tcl.gallery
+com.google.android.play.games
+com.google.android.marvin.talkback     # TalkBack screen reader
+com.tcl.assistant                      # TCL voice service; Google Assistant and the mic button still work
+com.tcl.smartalexa                     # Alexa; re-enabled by the firmware at every boot
+
+# Unused streaming apps (owner's choice; comment out what you use)
+com.google.android.youtube.tvunplugged # YouTube TV
+com.plexapp.android
+com.tubitv
+
+# Google TV setup wizard, for the new launcher: its RecoveryActivity claims HOME once launcherx is off.
+# Forget and re-join a Wi-Fi network it owns first (see Apply above).
+com.google.android.tungsten.setupwraith

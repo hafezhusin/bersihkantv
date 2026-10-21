@@ -1,0 +1,17 @@
+{
+  "dock_apps": [
+    "com.netflix.ninja",
+    "com.wbd.stream",
+    "com.amazon.amazonvideo.livingroom",
+    "com.hulu.livingroomplus"
+  ],
+  "hidden_apps": [
+    "com.tcl.suspension",
+    "com.tcl.partnercustomizer"
+  ],
+  "live_tv_package": "com.tcl.tv",
+  "app_labels": [
+    "com.tcl.tv=Live TV",
+    "com.wbd.stream=Max"
+  ]
+}
