@@ -94,6 +94,24 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
 - **Play Protect blocked the launcher** ("unsafe app blocked, built for an older version of Android")
   and `pm install` hung, then failed with `INSTALL_FAILED_VERIFICATION_FAILURE`, while it targeted
   SDK 29. It targets 34 now; if you built an old checkout, rebuild.
+- **`INSTALL_FAILED_VERIFICATION_FAILURE` for every APK on a China TCL / FFalcon set**, including one
+  signed by TCL itself: that is the manufacturer's install verifier, not Play Protect, and
+  `verifier_verify_adb_installs=0` or `-i com.tcl.guard` does not get past it
+  ([#376](https://github.com/Gathin23/cleanyourtv/issues/376),
+  [#683](https://github.com/Gathin23/cleanyourtv/issues/683)). Read logcat before deciding anything,
+  because the two TCL gates behave differently:
+  ```sh
+  tools/tv.py 'logcat -d -b main | grep -iE "verifier|Install not allowed" | tail -20'
+  ```
+  `verifier: signature does not match for tcl <pkg>`, `fetch signature info from :com.tcl.cyberui` or
+  `not support tcl ui tab` means the check runs in `com.android.packageinstaller`, and on these
+  Android 11 sets it can be skipped for the length of one install — disable the installer,
+  `pm install`, re-enable it immediately, then set Home and the TCL app ops. The three commands, the
+  undo if a step fails and what is verified are in
+  [devices/tcl-ffalcon-install-verifier.md](devices/tcl-ffalcon-install-verifier.md). A
+  `PackageManager: Install not allowed` line from `system_server` is the other gate, inside the package
+  manager ([tcl-mt9655-cn-android14.md](devices/tcl-mt9655-cn-android14.md)): nothing bypasses it, and a
+  USB stick through 电视卫士 is the only channel there.
 - **`pm install` fails with `INSTALL_FAILED_OLDER_SDK`** on a set older than the launcher: the APK's
   `minSdk` is a compile-time floor, so a TV on Android 7.0/7.1 (SDK 24/25) cannot take the published
   build at all ([#576](https://github.com/Gathin23/cleanyourtv/issues/576)). Read both numbers before

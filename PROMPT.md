@@ -87,9 +87,17 @@ Launcher
 - Check that the TV accepts APKs before building anything. Some China-market sets answer every
   sideload with `INSTALL_FAILED_VERIFICATION_FAILURE` — `adb install`, `pm install`, a hand-started
   installer and even the manufacturer's own APKs all fail — and others refuse any package that
-  declares `android.intent.category.HOME` unless it carries the manufacturer's signature. If you
-  hit either, do the debloat half, say plainly that the launcher half is impossible here, and stop
-  retrying installs. The matching `examples/` header says which case your TV is.
+  declares `android.intent.category.HOME` unless it carries the manufacturer's signature. Read
+  `logcat` while one install fails before concluding anything, because there are two different gates
+  here. If the refusal names the installer's verifier (`verifier: signature does not match for tcl`,
+  `fetch signature info from :com.tcl.cyberui`, `not support tcl ui tab`), then on China TCL / FFalcon
+  Android 11 sets it can be stepped around for the length of one install: disable
+  `com.android.packageinstaller`, `pm install`, and re-enable it immediately — the window and its undo
+  are in `docs/devices/tcl-ffalcon-install-verifier.md`, and the TCL app ops that make Home survive a
+  reboot are in the same note. If `logcat` shows `PackageManager: Install not allowed` with a
+  `system_server` tag instead, the check is inside the package manager and no window exists: do the
+  debloat half, say plainly that the launcher half is impossible here, and stop retrying installs. The
+  matching `examples/` header says which case your TV is.
 - Check the TV's SDK level before promising the launcher, too: `tools/tv.py 'getprop
   ro.build.version.sdk'` against `grep minSdk launcher/app/build.gradle` (26 = Android 8.0). A set
   below it answers `INSTALL_FAILED_OLDER_SDK`; lowering `minSdk` is a source change you would then
