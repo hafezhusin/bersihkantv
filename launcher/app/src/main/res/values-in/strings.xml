@@ -99,4 +99,8 @@
     <string name="race_live">%1$s · langsung</string>
     <string name="race_finished">Bendera finis</string>
     <string name="last_opened">Terakhir dibuka %1$s</string>
+    <string name="dock_pin">Sematkan ke Dock</string>
+    <string name="dock_remove">Hapus dari Dock</string>
+    <string name="tile_move">Pindahkan</string>
+    <string name="tile_app_info">Info aplikasi</string>
 </resources>

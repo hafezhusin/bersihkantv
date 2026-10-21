@@ -54,6 +54,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         /** Called for a D-pad direction key on a tile. Return true when handled (focus stays put). */
         boolean onTileVerticalKey(int position, int keyCode);
 
+        /** Hold OK on an app tile with tile_menu on: the tile menu (pin to or remove from the dock, move, app info). */
+        void onTileMenu(int position, View card);
+
         void onLibraryRequested();
         void onLibraryFocused();
         void onLibraryUp();
@@ -182,6 +185,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final List<String> favourites;
     /** Grid apps fill the dock slots dock_apps leaves free (config.xml, fill_dock). */
     private final boolean fillDock;
+    /** tile_menu: hold OK opens the tile menu instead of App info. */
+    private final boolean tileMenu;
     /** Dock apps found at the last reload, and the empty slots after them. */
     private int docked, emptySlots;
     /** Never shown as tiles (res/values/config.xml, hidden_apps). */
@@ -206,6 +211,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.dockSize = dockSize;
         this.favourites = cfg.dockApps;
         this.fillDock = cfg.fillDock;
+        this.tileMenu = cfg.tileMenu;
         this.hidden = new HashSet<>(cfg.hiddenApps);
         this.animations = cfg.animations;
         this.advancedEffects = cfg.animations && cfg.advancedEffects;
@@ -437,14 +443,21 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {
-            Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + e.pkg));
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            try {
-                ctx.startActivity(i);
-            } catch (ActivityNotFoundException ignored) {
-            }
+            int at = h.getBindingAdapterPosition();
+            if (!tileMenu || e.kind == Entry.HOME_SETTINGS || at == RecyclerView.NO_POSITION) openAppInfo(ctx, e.pkg);
+            else listener.onTileMenu(at, v);
             return true;
         });
+    }
+
+    /** The system's App info page for a package (force stop, disable, storage). */
+    static void openAppInfo(Context ctx, String pkg) {
+        Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + pkg));
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            ctx.startActivity(i);
+        } catch (ActivityNotFoundException ignored) {
+        }
     }
 
     /** Opens the tile's activity by explicit component, with no extras: a card can name nothing else. */

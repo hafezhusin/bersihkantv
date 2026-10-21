@@ -114,6 +114,9 @@
     <!-- A reorder button (two arrows) in the top bar. Off by default: reordering is also in the Settings
          button's long-press menu, so it needs no extra button on screen. -->
     <bool name="reorder_button">false</bool>
+    <!-- Hold OK on a tile: a small menu with Pin to dock / Remove from dock, Move and App info. Off by default: hold OK
+         then opens the app's App info page straight away, as it always has. -->
+    <bool name="tile_menu">false</bool>
     <!-- Wi-Fi and Settings as round icon-only buttons (the network name moves to the talkback description);
          Inputs keeps its label. -->
     <bool name="icon_only_buttons">false</bool>

@@ -1011,6 +1011,93 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         return super.dispatchKeyEvent(event);   // arrows navigate as usual
     }
 
+    /**
+     * Hold OK on a tile: a small glass menu under it. Pin puts the app in the last dock place, and the app that was
+     * there becomes the first app below the dock; Remove sends the app to that first place below, and the app that
+     * was there joins the end of the dock (the dock is always a full row). Both run as a short reorder session, so
+     * the result is saved like any reorder.
+     */
+    @Override
+    public void onTileMenu(int position, View card) {
+        if (reordering || position >= adapter.movableCount()) return;
+        String key = adapter.keyAt(position);
+        String pkg = adapter.packageAt(position);
+        View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
+        LinearLayout rows = panel.findViewById(R.id.rows);
+        PopupWindow popup = glassPopup(panel, (int) (200 * density));
+        if (dockRow && adapter.movableCount() > COLUMNS) {
+            if (position < adapter.dockFilled()) {
+                addSettingsMenuRow(rows, popup, R.string.dock_remove, () -> removeFromDock(key));
+            } else {
+                addSettingsMenuRow(rows, popup, R.string.dock_pin, () -> pinToDock(key));
+            }
+        }
+        addSettingsMenuRow(rows, popup, R.string.tile_move, () -> moveTile(key));
+        addSettingsMenuRow(rows, popup, R.string.tile_app_info, () -> AppAdapter.openAppInfo(this, pkg));
+        panel.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        popup.setWidth(Math.max((int) (200 * density), panel.getMeasuredWidth()));
+        // Under the tile when it fits on screen; otherwise above it (the dock and the lowest grid row), unfolding
+        // upwards from its bottom edge. Measured against the focused tile's zoomed size.
+        int[] at = new int[2];
+        card.getLocationOnScreen(at);
+        int gap = (int) (10 * density), panelHeight = panel.getMeasuredHeight();
+        int tileHeight = Math.round(card.getHeight() * card.getScaleY());
+        int top = at[1] - (tileHeight - card.getHeight()) / 2;
+        if (top + tileHeight + gap + panelHeight <= root.getHeight()) {
+            dropIn(popup, panel, card, Gravity.START);
+        } else {
+            panel.setAlpha(0f);
+            panel.setPivotY(panelHeight);
+            panel.setScaleY(0.92f);
+            panel.setTranslationY(8 * density);
+            popup.showAsDropDown(card, 0, -(card.getHeight() + (tileHeight - card.getHeight()) / 2 + gap + panelHeight),
+                    Gravity.START);
+            panel.animate().alpha(1f).scaleY(1f).translationY(0f).setDuration(220)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
+        }
+        rows.getChildAt(0).requestFocus();
+    }
+
+    private void pinToDock(String key) {
+        if (!beginReorder()) return;
+        int from = adapter.positionOf(key);
+        int to = Math.min(COLUMNS, adapter.movableCount()) - 1;
+        if (from <= to) {
+            endReorder();
+            return;
+        }
+        keepScroll(() -> adapter.move(from, to));
+        endReorder();
+        int now = adapter.positionOf(key);
+        refocusAfterLayout(now >= 0 ? now : to);   // focus follows the app into the dock
+    }
+
+    private void removeFromDock(String key) {
+        if (!beginReorder()) return;
+        int from = adapter.positionOf(key);
+        int to = Math.min(COLUMNS, adapter.movableCount() - 1);
+        if (from < 0 || from >= to) {
+            endReorder();
+            return;
+        }
+        keepScroll(() -> adapter.move(from, to));
+        endReorder();
+        refocusAfterLayout(from);   // stay on the dock place, now holding the app that moved up
+    }
+
+    /** Move: reorder mode with this tile already picked up. */
+    private void moveTile(String key) {
+        if (!beginReorder()) return;
+        int pos = adapter.positionOf(key);
+        if (pos < 0) {
+            endReorder();
+            return;
+        }
+        focusTile(pos);
+        pickUp(pos);
+        Toast.makeText(this, R.string.reorder_hint, Toast.LENGTH_LONG).show();
+    }
+
     /** Puts the app at pos into dock place slot, and the app that was there where the chosen one was; then saves. */
     private void swapIntoDock(int slot, int pos) {
         String slotKey = adapter.keyAt(slot);

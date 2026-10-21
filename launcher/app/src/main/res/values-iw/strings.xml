@@ -71,6 +71,10 @@
     <string name="reorder">סידור אפליקציות</string>
     <string name="reorder_hint">אישור מרים אפליקציה, החצים מזיזים אותה, חזרה מניחה אותה. חזרה שוב לסיום.</string>
     <string name="reorder_not_saved">לא ניתן לשמור את הסדר החדש</string>
+    <string name="dock_pin">הצמדה לשורת המועדפים</string>
+    <string name="dock_remove">הסרה משורת המועדפים</string>
+    <string name="tile_move">הזזה</string>
+    <string name="tile_app_info">פרטי האפליקציה</string>
     <string name="app_library">ספריית אפליקציות</string>
     <string name="library_empty">לא נמצאו אפליקציות שניתן לפתוח</string>
     <string name="library_on_home">במסך הבית</string>

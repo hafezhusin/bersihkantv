@@ -83,4 +83,8 @@
         <item quantity="other">%1$d applications</item>
     </plurals>
     <string name="greeting_with_name">%1$s, %2$s</string>
+    <string name="dock_pin">Épingler au dock</string>
+    <string name="dock_remove">Retirer du dock</string>
+    <string name="tile_move">Déplacer</string>
+    <string name="tile_app_info">Infos sur l\'appli</string>
 </resources>

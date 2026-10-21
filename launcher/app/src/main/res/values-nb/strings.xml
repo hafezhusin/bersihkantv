@@ -100,4 +100,8 @@
     <string name="race_live">%1$s · direkte</string>
     <string name="race_finished">Målgang</string>
     <string name="last_opened">Sist åpnet %1$s</string>
+    <string name="dock_pin">Fest til favorittraden</string>
+    <string name="dock_remove">Fjern fra favorittraden</string>
+    <string name="tile_move">Flytt</string>
+    <string name="tile_app_info">Appinfo</string>
 </resources>

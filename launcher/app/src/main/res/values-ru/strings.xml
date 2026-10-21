@@ -90,4 +90,8 @@
         <item quantity="other">%1$d приложения</item>
     </plurals>
     <string name="greeting_with_name">%1$s, %2$s</string>
+    <string name="dock_pin">Закрепить в доке</string>
+    <string name="dock_remove">Убрать из дока</string>
+    <string name="tile_move">Переместить</string>
+    <string name="tile_app_info">О приложении</string>
 </resources>

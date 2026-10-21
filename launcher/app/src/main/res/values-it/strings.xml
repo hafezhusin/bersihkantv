@@ -94,4 +94,8 @@
     <string name="race_live">%1$s · in diretta</string>
     <string name="race_finished">Bandiera a scacchi</string>
     <string name="last_opened">Ultima apertura: %1$s</string>
+    <string name="dock_pin">Fissa nel dock</string>
+    <string name="dock_remove">Rimuovi dal dock</string>
+    <string name="tile_move">Sposta</string>
+    <string name="tile_app_info">Informazioni app</string>
 </resources>

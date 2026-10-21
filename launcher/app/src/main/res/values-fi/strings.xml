@@ -88,4 +88,8 @@
     <string name="dock_edit">Muokkaa telakkaa</string>
     <string name="dock_edit_hint">Valitse muutettava telakan paikka ja paina OK. Takaisin lopettaa.</string>
     <string name="dock_edit_pick_app">Valitse nyt sinne tuleva sovellus ja paina OK. Takaisin valitsee toisen paikan.</string>
+    <string name="dock_pin">Kiinnitä telakkaan</string>
+    <string name="dock_remove">Poista telakasta</string>
+    <string name="tile_move">Siirrä</string>
+    <string name="tile_app_info">Sovelluksen tiedot</string>
 </resources>
