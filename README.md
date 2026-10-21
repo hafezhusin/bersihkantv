@@ -317,6 +317,26 @@ why, and disables the rest of the list. So a list applied before the launcher ha
 the TV with nothing to start. Run the same list again once `launcher/build-and-install.sh` has made
 the new launcher Home and the entry is applied; `FORCE_HOME=1` (`$env:FORCE_HOME`) disables it anyway.
 
+### Companion bridge (opt-in)
+
+The [Clean Your TV Companion](https://github.com/gethari/clean-your-tv-companion) can discover a TV
+through an opt-in, ADB-only provider. It is **off in every normal build**, including the release APK
+and `build-and-install.sh`; nothing changes for existing themes, settings or permissions.
+
+```bash
+cd launcher
+./gradlew assembleRelease -PcompanionBridge=true   # only this build carries the provider
+```
+
+The opt-in build publishes `content://com.gathin.tvhome.companion/v1` with `capabilities`, `state`,
+transactional `stage`/`validate`/`activate`/`result`/`discard`, and bounded asset streaming (protocol
+version 1, no network). Ordinary apps are rejected; only the ADB shell UID and the launcher itself may
+call it. A staged collection is invisible until an explicit `activate` commits it atomically; Home then
+rebuilds from the new state. See
+[`docs/specs/companion-protocol.md`](docs/specs/companion-protocol.md) for the envelope, capability
+list, patch rules, revision rules, crash boundaries and retention limits. Rebuild without the flag to
+return to the standard launcher.
+
 ## The launcher
 
 A small native Android TV app (`com.gathin.tvhome`, about 429 KB installed) in plain Java with

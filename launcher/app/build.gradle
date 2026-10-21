@@ -2,6 +2,13 @@ plugins {
     id 'com.android.application'
 }
 
+// The companion bridge is opt-in at every layer. Without -PcompanionBridge=true the provider class is
+// not compiled and the provider is not in the merged manifest, so the default release build is byte-for
+// -byte the same feature set as before this change.
+def companionBridge = providers.gradleProperty('companionBridge')
+        .map { it == 'true' }.getOrElse(false)
+def generatedCompanionManifest = layout.buildDirectory.file('generated/companion/AndroidManifest.xml')
+
 android {
     namespace 'com.gathin.tvhome'
     compileSdk 34
@@ -13,6 +20,11 @@ android {
         targetSdk 34
         versionCode 6
         versionName '2.5'
+        buildConfigField 'boolean', 'COMPANION_BRIDGE', "${companionBridge}"
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     buildTypes {
@@ -45,4 +57,35 @@ dependencies {
     implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
     // Test only (never in the APK): plain JVM tests for the module card validators, src/test.
     testImplementation 'junit:junit:4.13.2'
+    // org.json is part of Android but not of a plain JVM test runtime.
+    testImplementation 'org.json:json:20240303'
+}
+
+if (companionBridge) {
+    android.sourceSets.main.java.srcDirs += 'src/companion/java'
+    android.sourceSets.main.manifest.srcFile generatedCompanionManifest
+}
+
+def generateCompanionManifest = tasks.register('generateCompanionManifest') {
+    description = 'Adds the opt-in companion provider to the merged manifest.'
+    def base = file('src/main/AndroidManifest.xml')
+    def output = generatedCompanionManifest
+    inputs.file(base)
+    outputs.file(output)
+    doLast {
+        def provider = '''
+        <!-- Opt-in companion protocol v1; see docs/specs/companion-protocol.md. -->
+        <provider android:name=".CompanionProvider"
+            android:authorities="com.gathin.tvhome.companion"
+            android:exported="true"
+            android:grantUriPermissions="false" />
+'''
+        def target = output.get().asFile
+        target.parentFile.mkdirs()
+        target.text = base.text.replace('</application>', provider + '    </application>')
+    }
+}
+
+if (companionBridge) {
+    tasks.named('preBuild') { dependsOn generateCompanionManifest }
 }

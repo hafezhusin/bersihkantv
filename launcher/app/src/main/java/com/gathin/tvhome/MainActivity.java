@@ -286,6 +286,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             updateClockVisibility();
         }
     };
+    // Only the opt-in companion provider fires this, after its atomic activation committed. Home is
+    // rebuilt from the new active collection; before this point nothing on screen changed.
+    private final Runnable companionActivated = () -> handler.post(() -> {
+        if (!isFinishing() && !isDestroyed()) recreate();
+    });
     private final Runnable minuteTick = new Runnable() {
         @Override
         public void run() {
@@ -637,6 +642,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             registerReceiver(packageReceiver, packageFilter);
             registerReceiver(timeReceiver, timeFilter);
         }
+        CompanionBridge.listen(companionActivated);
         updateClockVisibility();
     }
 
@@ -807,6 +813,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         started = false;
         unregisterReceiver(packageReceiver);
         unregisterReceiver(timeReceiver);
+        CompanionBridge.listen(null);
         handler.removeCallbacks(clockCheck);
         stopped = true;
         rebuildOnResume = true;
