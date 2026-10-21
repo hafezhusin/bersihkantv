@@ -1,0 +1,101 @@
+# TCL Smart TV Pro (G08, G08_4K_GB, MediaTek MT9618), Europe/UK firmware, Android 14
+# Model "Smart TV Pro", device G08, fingerprint TCL/G08_4K_GB/G08:14/UTT2.250416.001/AU02:user/release-keys
+# (build date Sun Apr 12 2026 CST). Successor firmware to examples/tcl-g08-eu-android12 - same package
+# families, plus the A14-era TCL apps (channelplus, usercenter, waterfall.overseas, esticker) that the
+# Android 12 EU build lacked. com.iplayer.android.webview is gone from this firmware entirely.
+#
+# Tested 21 October 2026 on one set (OTA from Android 12 -> 14, verified no debloat entry was
+# reactivated by the update; the OTA newly installed com.tcl.channelplus). All 56 packages below are
+# disabled on that set; it boots, plays HDMI/Live TV, opens the source menu, YouTube + Prime Video
+# preloads stay enabled and the custom launcher keeps Home (launcherx + setupwraith disabled).
+#
+# Apply:   TV_HOST=<tv ip> tools/disable.sh examples/tcl-g08-eu-android14/debloat.txt
+# Undo:    TV_HOST=<tv ip> tools/restore.sh examples/tcl-g08-eu-android14/debloat.txt
+# Everything is DISABLED (pm disable-user), not uninstalled. Comment out any line you want to keep.
+#
+# Left enabled on purpose: com.tcl.tv, com.tcl.tvinput, com.tcl.globalkeyoverlay,
+# com.tcl.tv.tclhome_passive, com.google.android.katniss (voice), com.google.android.gms/gsf/vending,
+# com.dolby.*, com.mediatek.speakerservice/mdns-offload, com.google.android.youtube.tv and
+# com.amazon.amazonvideo.livingroom (user-kept preloads), Play Webview, the load-bearing packages
+# marked DO NOT DISABLE below.
+
+# TCL promo, push messages, help/demo apps, log capture, overlays (20)
+com.tcl.dashboard                      # home-screen push messages
+com.tcl.messagebox
+com.tcl.exhibit                        # TCL Channel store
+com.tcl.hearaid
+com.tcl.ocean.instructions             # onboarding/tips overlay
+com.tcl.repairguide
+com.tcl.logkit                         # log collection
+com.tcl.browser                        # TCL light browser (Google WebView stays)
+com.tcl.smartalexa
+com.tcl.t_solo
+com.tcl.eva                            # TCL voice assistant layer (Katniss handles voice without it)
+com.tcl.magiconnectfree                # MagicConnect pairing promo
+com.tcl.gamebar
+com.tcl.UpdatePeripheral               # peripheral firmware helper
+com.tcl.factory.view
+com.tcl.inputmethod.international
+com.tcl.channelplus                    # TCL Channel+ web storefront (new in the A14 OTA)
+com.tcl.esticker                       # promo screensaver
+com.tcl.usercenter                     # TCL account center
+com.tcl.waterfall.overseas             # TCL content/ads feed (irrelevant with a custom launcher)
+
+# Duplicate webviews (com.google.android.webview is the active one) (2)
+com.tcl.android.webview
+com.mediatek.support.webview
+# com.iplayer.android.webview         # removed from this firmware entirely - nothing to disable
+
+# Mediatek casting/telemetry leftovers (3)
+com.mediatek.airplaydaemon
+com.mediatek.backgrounddetection
+com.mediatek.network
+
+# Google storefront, voice extras, stock home and wizard (11)
+com.google.android.videos              # Play Movies storefront
+com.google.android.tts                 # TTS (left on purpose if you use voice TTS screens)
+com.google.android.apps.tv.dreamx      # photo screensaver
+com.google.android.apps.tv.launcherx   # stock launcher (custom launcher installed)
+com.google.android.tungsten.setupwraith # Google TV setup wizard (claims Home when launcherx dies)
+com.google.android.modulemetadata
+com.google.android.overlay.googlewebview
+com.google.android.overlay.gtvsconfigx
+com.google.android.overlay.gtvssettingsprovider
+com.google.android.overlay.modules.modulemetadata.forframework
+com.google.android.overlay.modules.permissioncontroller
+
+# Netflix system dependancy (1) - disable only if Netflix is not used
+com.netflix.tokenmanager
+
+# Small Android leftovers unused on a TV (19)
+android.autoinstalls.config.google.gtvpai
+com.android.backupconfirm
+com.android.captiveportallogin
+com.android.companiondevicemanager
+com.android.dynsystem
+com.android.hotspot2.osulogin
+com.android.htmlviewer
+com.android.localtransport
+com.android.pacprocessor
+com.android.printspooler
+com.android.providers.calendar
+com.android.providers.contacts
+com.android.providers.userdictionary
+com.android.proxyhandler
+com.android.se
+com.android.sharedstoragebackup
+com.android.statementservice
+com.android.tv.feedbackconsent
+com.android.wallpaperbackup
+
+# DO NOT DISABLE - verified on this set, 21 Oct 2026 (same findings as the Android 12 EU list):
+# com.tcl.autopair   - Bluetooth remote pairing. Disable it and a remote that unpairs (battery
+#   swap, reset) can never pair again.
+# com.tcl.suspension  - hosts the source-menu QuickPanel. Source key (KEYCODE_TV_INPUT, 178) goes
+#   TclShortCutKeyManager -> startService com.tcl.suspension/.DismissService; disabling it makes the
+#   Source key silently dead ("Unable to start service ... not found"). Restore: pm enable com.tcl.suspension.
+# com.tcl.interactive - provides the tcl_tias_tbrowser service com.tcl.tv binds for the source/HbbTV
+#   overlay. Disabled, vendor.tcl.tvinput.extend-service spams "Passing null binder object" plus
+#   com.tcl.tbrowser NullPointerException at ~10 Hz forever.
+# com.tcl.ttvs        - same TIAS chain (and the teletext soft-keyboard IME). Disable breaks the
+#   live-TV source overlays like the two above.
