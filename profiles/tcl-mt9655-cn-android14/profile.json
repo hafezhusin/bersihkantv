@@ -1,0 +1,287 @@
+{
+  "format": "cleanyourtv-profile",
+  "version": 1,
+  "id": "tcl-mt9655-cn-android14",
+  "title": "TCL / FFalcon MT9655 China, Android 14 (build AU01)",
+  "identity": {
+    "brand": "TCL",
+    "manufacturer": "TCL",
+    "model": "Smart TV Pro",
+    "product": "MT9655_4K_CN",
+    "device": "MT9655",
+    "board": "merak",
+    "hardware": "mtktv",
+    "android_release": "14",
+    "sdk": "34",
+    "build_id": "AU01",
+    "build_display": "tcl9655_cn_an64-user 14 UTT2.250416.001 AU01 release-keys",
+    "fingerprint": "",
+    "region": "CN",
+    "abi": "arm64-v8a"
+  },
+  "evidence": {
+    "level": "device-verified",
+    "date": "2026-10-21",
+    "source": "examples/tcl-mt9655-cn-android14/debloat.txt and docs/devices/tcl-mt9655-cn-android14.md",
+    "device": "TCL / FFalcon MT9655 China, one physical unit, one session",
+    "reboot_exercised": true,
+    "restore_exercised": false,
+    "post_change_checks": {
+      "remote": "Home, Settings and the source panel responded after the reboot",
+      "input": "the source panel and Media Center still worked; HDMI playback was not exercised with an external source",
+      "casting": "Multi-screen still worked; no cast session was started",
+      "updates": "the three updater packages were disabled, so updating was not exercised afterwards",
+      "streaming_app": "the app store, 电视卫士 and Media Center opened"
+    },
+    "gaps": [
+      "ro.build.fingerprint was not captured; the profile matches on product, build_id and build_display instead",
+      "restore was not exercised on the device yet",
+      "HDMI and Cast were checked at the package level, not with an external device"
+    ]
+  },
+  "protected": [
+    {"package": "com.tcl.cyberui", "category": "home", "reason": "the only MAIN+HOME activity; disabling leaves the TV with no Home"},
+    {"package": "com.tcl.tv", "category": "inputs", "reason": "Live TV and HDMI playback"},
+    {"package": "com.tcl.tvinput", "category": "inputs", "reason": "tuner, HDMI and AV input routing"},
+    {"package": "com.tcl.settings", "category": "setup", "reason": "the only Settings app on this firmware"},
+    {"package": "com.tcl.systemserver", "category": "setup", "reason": "system service host"},
+    {"package": "com.tcl.providers.config", "category": "setup", "reason": "install policy and TV configuration provider"},
+    {"package": "com.tcl.guard", "category": "setup", "reason": "电视卫士, the only channel that installs an APK on this firmware"},
+    {"package": "com.tcl.appmarket2", "category": "setup", "reason": "app store"},
+    {"package": "com.tcl.ui_mediaCenter", "category": "inputs", "reason": "USB media playback"},
+    {"package": "com.sohu.inputmethod.sogou.tv", "category": "setup", "reason": "the only keyboard"},
+    {"package": "com.tcl.autopair", "category": "remote", "reason": "remote pairing"},
+    {"package": "com.tcl.miracast", "category": "casting", "reason": "Miracast receiver"},
+    {"package": "com.tcl.MultiScreenInteraction_TV", "category": "casting", "reason": "Multi-screen casting"},
+    {"package": "com.tcl.systemui.plugin.*", "category": "inputs", "reason": "source panel and quick settings plug-ins"},
+    {"package": "com.tcl.usercenter", "category": "setup", "reason": "account surface used by the store and updates"},
+    {"package": "com.tcl.walleve", "category": "accessibility", "reason": "voice control, kept by the owner's choice"},
+    {"package": "com.tcl.ttvs", "category": "updates", "reason": "TCL firmware service kept by the owner; the separate updater apps are the ones this profile offers"}
+  ],
+  "packages": [
+    {
+      "package": "com.tcl.bootadservice",
+      "group": "ads and telemetry",
+      "rationale": "Full-screen advertisement played before Home",
+      "impact": "the boot ad returns",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.profilemanager",
+      "group": "ads and telemetry",
+      "rationale": "Audience and profile reporting",
+      "impact": "viewing-profile uploads resume",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.xian.StartandroidService",
+      "group": "ads and telemetry",
+      "rationale": "Background reporting service",
+      "impact": "background reporting resumes",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.logkit",
+      "group": "ads and telemetry",
+      "rationale": "Collects and uploads device logs",
+      "impact": "log collection resumes; bug reports to TCL lose the local log",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.atomic.servicecenter",
+      "group": "ads and telemetry",
+      "rationale": "Home-screen recommendation cards and their service",
+      "impact": "TCL recommendation cards disappear; the stock home keeps rendering its own feed",
+      "risk": "medium",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.c2dm.client",
+      "group": "ads and telemetry",
+      "rationale": "Long-lived TCL push connection",
+      "impact": "TCL push messages and some recommendation pushes stop",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.wholenetsearch",
+      "group": "ads and telemetry",
+      "rationale": "Whole-net search with video-on-demand promotions",
+      "impact": "the vendor search row loses its promoted results",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.playskill",
+      "group": "ads and telemetry",
+      "rationale": "Promotional tips app",
+      "impact": "promotional tips stop",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.repairguide",
+      "group": "ads and telemetry",
+      "rationale": "Repair-guide app, not reachable without the vendor menu",
+      "impact": "the repair guide is no longer available from the TV",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.useragreement",
+      "group": "ads and telemetry",
+      "rationale": "User-agreement pop-up",
+      "impact": "the agreement prompt stops appearing; no feature depends on it",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.appreciate.art",
+      "group": "ads and telemetry",
+      "rationale": "Art-wallpaper and screensaver promotional content",
+      "impact": "the vendor art wallpaper and its promo content stop",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.ffeducation",
+      "group": "ads and telemetry",
+      "rationale": "Kids and education content entry",
+      "impact": "the education entry disappears",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.ffkaraoke",
+      "group": "ads and telemetry",
+      "rationale": "Karaoke content entry",
+      "impact": "the karaoke entry disappears",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.versionUpdateApp",
+      "group": "updates",
+      "rationale": "System OTA and app auto-update",
+      "impact": "the TV stops receiving system and stock-app updates while this stays disabled",
+      "risk": "high",
+      "default_selected": false
+    },
+    {
+      "package": "com.tcl.UpdatePeripheral",
+      "group": "updates",
+      "rationale": "Peripheral firmware OTA, about 200 MB resident",
+      "impact": "remote and peripheral firmware updates stop",
+      "risk": "medium",
+      "default_selected": false
+    },
+    {
+      "package": "com.snm.upgrade",
+      "group": "updates",
+      "rationale": "A second updater (updateos)",
+      "impact": "the second update path stops",
+      "risk": "high",
+      "default_selected": false
+    },
+    {
+      "package": "com.tcl.common.weather",
+      "group": "content and widgets",
+      "rationale": "Weather widget and its background service",
+      "impact": "the weather widget disappears",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.tshop",
+      "group": "content and widgets",
+      "rationale": "TCL shop and shopping entry",
+      "impact": "the shopping entry disappears",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.gamebar",
+      "group": "content and widgets",
+      "rationale": "Game bar",
+      "impact": "the game bar stops opening",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.t_solo",
+      "group": "content and widgets",
+      "rationale": "Game centre",
+      "impact": "the game centre disappears",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.micmanager",
+      "group": "content and widgets",
+      "rationale": "Microphone manager used by karaoke",
+      "impact": "karaoke microphone features stop; voice control (com.tcl.walleve) is kept",
+      "risk": "medium",
+      "default_selected": true
+    },
+    {
+      "package": "com.audiocn.karaoke.micmanager",
+      "group": "content and widgets",
+      "rationale": "Karaoke microphone manager",
+      "impact": "karaoke microphone features stop",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.tvsmartalbum",
+      "group": "content and widgets",
+      "rationale": "Smart photo album",
+      "impact": "the smart album disappears",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.hotelmenu",
+      "group": "content and widgets",
+      "rationale": "Hotel mode",
+      "impact": "hotel mode is unavailable",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.hearaid",
+      "group": "content and widgets",
+      "rationale": "Hearing-aid support app",
+      "impact": "hearing-aid users lose the vendor support app, so this is not selected by default",
+      "risk": "medium",
+      "default_selected": false
+    },
+    {
+      "package": "com.tcl.vod",
+      "group": "content and widgets",
+      "rationale": "TCL video-on-demand entry",
+      "impact": "the VOD entry disappears",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.qiyiguo",
+      "group": "content and widgets",
+      "rationale": "iQIYI content entry",
+      "impact": "the iQIYI entry disappears",
+      "risk": "low",
+      "default_selected": true
+    },
+    {
+      "package": "com.tcl.tliveplay",
+      "group": "content and widgets",
+      "rationale": "Live TV content entry, separate from the Live TV player",
+      "impact": "the content entry disappears; com.tcl.tv still plays Live TV",
+      "risk": "low",
+      "default_selected": true
+    }
+  ]
+}
