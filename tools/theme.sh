@@ -30,7 +30,10 @@ tv() { "$PY" -I tv.py "$@"; }
 # back and switch accessibility on again as build-and-install does. Some TVs (TCL Smart TV Pro G03, Android 11)
 # also keep the service in their "crashed" list after the force-stop and leave it unbound until accessibility
 # itself goes off and on again, so switch it off with the list cleared and wait a second before writing back.
-RESTART="a=\$(settings get secure enabled_accessibility_services); am force-stop $PKG; am start -n $PKG/.MainActivity >/dev/null; case \"\$a\" in *$PKG*) sleep 1; settings put secure enabled_accessibility_services ''; settings put secure accessibility_enabled 0; sleep 1; settings put secure enabled_accessibility_services \"\$a\"; settings put secure accessibility_enabled 1 ;; esac"
+# When the launcher is already Home, it comes back through the Home intent: `am start -n` from the shell starts a
+# second MainActivity in an ordinary task behind the Home one, and both stay in memory. Otherwise (a theme pushed
+# before the handover) it is started by name as before, so the new look still shows.
+RESTART="a=\$(settings get secure enabled_accessibility_services); am force-stop $PKG; case \"\$(cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME | tail -n 1)\" in $PKG/*) am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null ;; *) am start -n $PKG/.MainActivity >/dev/null ;; esac; case \"\$a\" in *$PKG*) sleep 1; settings put secure enabled_accessibility_services ''; settings put secure accessibility_enabled 0; sleep 1; settings put secure enabled_accessibility_services \"\$a\"; settings put secure accessibility_enabled 1 ;; esac"
 
 # Some firmware (TCL G07, Android 11) locks the shell out of Android/data. Files are staged in
 # /data/local/tmp and copied in, or written through the launcher's ThemeProvider when that is refused.
