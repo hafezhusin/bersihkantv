@@ -108,6 +108,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private long idleClockMs;
     private final Runnable showIdleClock = () -> startActivity(new Intent(this, ClockActivity.class));
     private String liveTvAction;
+    /** The app library is on (config.xml, app_library): only then can the tile menu take an app off Home. */
+    private boolean appLibraryEnabled;
     private String inputAction;
     private String sourcePanelService;
     private String sourcePanelAction;
@@ -317,6 +319,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         liveTvPkg = cfg.liveTvPackage;
         idleClockMs = cfg.homeIdleClockMinutes * MINUTE_MS;
         liveTvAction = cfg.liveTvAction;
+        appLibraryEnabled = cfg.appLibrary;
         inputAction = cfg.inputAction;
         sourcePanelService = cfg.sourcePanelService;
         sourcePanelAction = cfg.sourcePanelAction;
@@ -2475,6 +2478,55 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // Hebrew puts Settings at the left of the header: grow the menu inward from it.
         dropIn(popup, panel, anchor, getResources().getBoolean(R.bool.rtl_menu_bar)
                 ? Gravity.START : Gravity.END);
+        rows.getChildAt(0).requestFocus();
+    }
+
+    /**
+     * Hold OK on a tile: a glass menu next to it. Move starts reorder mode with this tile already picked up;
+     * Remove from Home takes the shortcut off (only with the app library on, where one press adds it back);
+     * App info opens the TV's page for the app, which is what holding OK used to do.
+     */
+    @Override
+    public void onTileLongPress(int position, View card) {
+        if (reordering) return;
+        String key = adapter.keyAt(position);
+        String pkg = adapter.packageAt(position);
+        // Empty dock slots and the Default-home tile carry the launcher's own package: no menu for them.
+        if (key == null || pkg == null || pkg.equals(getPackageName())) return;
+        View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
+        LinearLayout rows = panel.findViewById(R.id.rows);
+        PopupWindow popup = glassPopup(panel, (int) (200 * density));
+        if (position < adapter.movableCount()) addSettingsMenuRow(rows, popup, R.string.tile_move, () -> {
+            if (!beginReorder()) return;
+            int at = adapter.positionOf(key);   // beginReorder can rebuild the tiles
+            if (at < 0) return;
+            focusTile(at);
+            pickUp(at);
+            Toast.makeText(this, R.string.reorder_hint, Toast.LENGTH_LONG).show();
+        });
+        if (appLibraryEnabled) addSettingsMenuRow(rows, popup, R.string.library_remove_shortcut, () -> {
+            if (LibraryApps.save(this, pkg, false)) reloadApps(false);
+            else Toast.makeText(this, R.string.library_save_failed, Toast.LENGTH_LONG).show();
+        });
+        addSettingsMenuRow(rows, popup, R.string.library_app_info, () -> open(new Intent(
+                Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + pkg))));
+        panel.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        popup.setWidth(Math.max((int) (200 * density), panel.getMeasuredWidth()));
+        // Dock tiles sit near the bottom of the screen: open the menu above the tile when it would not fit below.
+        int[] at = new int[2];
+        card.getLocationInWindow(at);
+        int gap = (int) (10 * density), height = panel.getMeasuredHeight();
+        if (at[1] + card.getHeight() + gap + height <= root.getHeight()) {
+            dropIn(popup, panel, card, Gravity.START);
+        } else {
+            panel.setAlpha(0f);
+            panel.setPivotY(height);
+            panel.setScaleY(0.92f);
+            panel.setTranslationY(8 * density);
+            popup.showAtLocation(root, Gravity.NO_GRAVITY, at[0], Math.max(0, at[1] - gap - height));
+            panel.animate().alpha(1f).scaleY(1f).translationY(0f).setDuration(220)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
+        }
         rows.getChildAt(0).requestFocus();
     }
 

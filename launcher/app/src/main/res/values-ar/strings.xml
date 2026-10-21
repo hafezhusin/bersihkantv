@@ -65,6 +65,7 @@
     <string name="dock_edit_hint">اختر الموضع الذي تريد تغييره في الشريط واضغط موافق. اضغط رجوع للإنهاء.</string>
     <string name="dock_edit_pick_app">اختر الآن التطبيق الذي تريد وضعه هناك واضغط موافق. اضغط رجوع لاختيار موضع آخر.</string>
     <string name="reorder">إعادة ترتيب التطبيقات</string>
+    <string name="tile_move">نقل</string>
     <string name="reorder_hint">اضغط موافق لالتقاط تطبيق، والأسهم لتحريكه، ورجوع لتثبيته. اضغط رجوع مرة أخرى للإنهاء.</string>
     <string name="reorder_not_saved">تعذّر حفظ الترتيب الجديد</string>
     <string name="app_library">مكتبة التطبيقات</string>

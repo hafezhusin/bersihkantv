@@ -75,6 +75,7 @@
     <string name="dock_edit_hint">Kies de plek in het dock die je wilt wijzigen en druk op OK. Terug om te stoppen.</string>
     <string name="dock_edit_pick_app">Kies nu de app voor die plek en druk op OK. Terug om een andere plek te kiezen.</string>
     <string name="reorder">Apps ordenen</string>
+    <string name="tile_move">Verplaatsen</string>
     <string name="reorder_hint">OK pakt een app op, de pijlen verplaatsen hem, Terug zet hem neer. Nog eens Terug om te stoppen.</string>
     <string name="reorder_not_saved">Kon de nieuwe volgorde niet opslaan</string>
     <string name="app_library">Appbibliotheek</string>

@@ -75,6 +75,7 @@
     <string name="dock_edit_hint">Oʻzgartiriladigan joyni tanlab, OK ni bosing. Tugatish uchun Back.</string>
     <string name="dock_edit_pick_app">Endi u yerga qoʻyiladigan ilovani tanlab, OK ni bosing. Boshqa joy tanlash uchun Back.</string>
     <string name="reorder">Ilovalar tartibini oʻzgartirish</string>
+    <string name="tile_move">Koʻchirish</string>
     <string name="reorder_hint">OK ilovani ushlaydi, strelkalar suradi, Back joyiga qoʻyadi. Tugatish uchun yana Back.</string>
     <string name="reorder_not_saved">Yangi tartib saqlanmadi</string>
     <string name="app_library">Ilovalar kutubxonasi</string>

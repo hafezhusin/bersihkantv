@@ -70,6 +70,7 @@
     <string name="dock_edit_hint">Scegli il posto del dock da cambiare e premi OK. Indietro per finire.</string>
     <string name="dock_edit_pick_app">Ora scegli l\'app da mettere lì e premi OK. Indietro per scegliere un altro posto.</string>
     <string name="reorder">Riordina le app</string>
+    <string name="tile_move">Sposta</string>
     <string name="reorder_hint">OK prende un\'app, le frecce la spostano, Indietro la posiziona. Ancora Indietro per finire.</string>
     <string name="reorder_not_saved">Impossibile salvare il nuovo ordine</string>
     <string name="app_library">Libreria app</string>

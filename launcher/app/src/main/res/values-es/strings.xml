@@ -39,6 +39,7 @@
     <string name="dock_edit_hint">Elige el hueco del dock que quieres cambiar y pulsa OK. Atrás para terminar.</string>
     <string name="dock_edit_pick_app">Ahora elige la app que quieres poner ahí y pulsa OK. Atrás para elegir otro hueco.</string>
     <string name="reorder">Reordenar apps</string>
+    <string name="tile_move">Mover</string>
     <string name="reorder_hint">OK coge una app, las flechas la mueven, Atrás la suelta. Atrás de nuevo para terminar.</string>
     <string name="reorder_not_saved">No se pudo guardar el nuevo orden</string>
     <string name="app_library">Biblioteca de aplicaciones</string>

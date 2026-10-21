@@ -54,6 +54,7 @@
     <string name="dock_edit_hint">Escolha o lugar da dock a mudar e prima OK. Voltar para terminar.</string>
     <string name="dock_edit_pick_app">Agora escolha a app a colocar lá e prima OK. Voltar para escolher outro lugar.</string>
     <string name="reorder">Reordenar apps</string>
+    <string name="tile_move">Mover</string>
     <string name="reorder_hint">OK pega numa app, as setas movem-na, Voltar pousa-a. Voltar outra vez para terminar.</string>
     <string name="reorder_not_saved">Não foi possível guardar a nova ordem</string>
     <string name="app_library">Biblioteca de apps</string>

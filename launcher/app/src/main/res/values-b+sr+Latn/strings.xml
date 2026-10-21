@@ -46,6 +46,7 @@
     <string name="dock_edit_hint">Izaberite mesto u doku i pritisnite OK. Nazad za kraj.</string>
     <string name="dock_edit_pick_app">Sada izaberite aplikaciju za to mesto i pritisnite OK. Nazad da izaberete drugo mesto.</string>
     <string name="reorder">Promeni redosled aplikacija</string>
+    <string name="tile_move">Premesti</string>
     <string name="reorder_hint">OK podiže aplikaciju, strelice je pomeraju, Nazad je postavlja. Ponovo Nazad za kraj.</string>
     <string name="reorder_not_saved">Novi redosled nije sačuvan</string>
     <string name="app_library">Biblioteka aplikacija</string>
