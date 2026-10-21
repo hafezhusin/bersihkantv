@@ -7,11 +7,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.File;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 
 /** Remote-friendly settings owned by the launcher; system settings stay one row away. */
@@ -20,6 +26,7 @@ public final class LauncherSettingsActivity extends Activity {
     private final TextView[] columnChoices = new TextView[4];
     private final TextView[] rowChoices = new TextView[4];
     private TextView wallpaperChoice;
+    private TextView scheduleChoice;
     private TextView animationsChoice;
     private TextView advancedChoice;
     private TextView followThemeChoice;
@@ -71,6 +78,8 @@ public final class LauncherSettingsActivity extends Activity {
         }
         wallpaperChoice = findViewById(R.id.wallpaperChoice);
         wallpaperChoice.setOnClickListener(v -> showWallpaperPicker());
+        scheduleChoice = findViewById(R.id.scheduleChoice);
+        scheduleChoice.setOnClickListener(v -> showScheduleDialog());
         animationsChoice = findViewById(R.id.animationsChoice);
         animationsChoice.setOnClickListener(v -> {
             animations = !animations;
@@ -158,6 +167,39 @@ public final class LauncherSettingsActivity extends Activity {
                 .show();
     }
 
+    /** Enabled state, the next transition and the explicit off switch for a saved schedule. */
+    private void showScheduleDialog() {
+        JSONObject schedule = CompanionBridge.schedule(this);
+        if (schedule == null) return;
+        boolean enabled = schedule.optBoolean("enabled", false);
+        StringBuilder message = new StringBuilder(getString(R.string.theme_schedule_help));
+        JSONArray upcoming = schedule.optJSONArray("upcoming");
+        message.append("\n\n");
+        if (upcoming != null && upcoming.length() > 0) {
+            JSONObject next = upcoming.optJSONObject(0);
+            long at = next == null ? 0 : next.optLong("at", 0);
+            message.append(getString(R.string.theme_schedule_next, at > 0
+                    ? DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
+                    .format(new Date(at)) : ""));
+        } else {
+            message.append(getString(R.string.theme_schedule_no_next));
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.theme_schedule_label)
+                .setMessage(message)
+                .setPositiveButton(enabled ? R.string.theme_schedule_turn_off
+                        : R.string.theme_schedule_turn_on, (dialog, which) -> {
+                    if (CompanionBridge.setScheduleEnabled(this, !enabled)) {
+                        setResult(RESULT_OK);
+                        refresh();
+                    } else {
+                        Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     private static int indexOf(List<File> images, String name) {
         if (name == null) return -1;
         for (int i = 0; i < images.size(); i++) {
@@ -192,6 +234,14 @@ public final class LauncherSettingsActivity extends Activity {
                         : wallpaperCurrent != null ? wallpaperCurrent
                         : getString(R.string.wallpaper_theme_default)));
         followThemeChoice.setSelected(!hasOnTvChoices());
+        JSONObject schedule = CompanionBridge.schedule(this);
+        scheduleChoice.setVisibility(schedule == null ? View.GONE : View.VISIBLE);
+        if (schedule != null) {
+            boolean enabled = schedule.optBoolean("enabled", false);
+            String state = getString(enabled ? R.string.on : R.string.off);
+            if (schedule.optBoolean("invalid", false)) state = getString(R.string.not_available);
+            scheduleChoice.setText(getString(R.string.theme_schedule_state, state));
+        }
     }
 
     private boolean hasOnTvChoices() {

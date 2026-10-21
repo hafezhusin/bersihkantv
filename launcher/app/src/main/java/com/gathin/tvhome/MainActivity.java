@@ -111,6 +111,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private String inputAction;
     private String sourcePanelService;
     private String sourcePanelAction;
+    /** Effective theme fingerprint at the last schedule evaluation; changed means Home must rebuild. */
+    private String scheduleFingerprint = "";
 
     private AppAdapter adapter;
     private RecyclerView grid;
@@ -284,11 +286,19 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             updateClockVisibility();
+            // A manual clock or timezone change reconciles to the current state, never the backlog.
+            refreshScheduledTheme();
         }
     };
+    // Only the opt-in companion provider fires this, after its atomic activation committed. Home is
+    // rebuilt from the new active collection; before this point nothing on screen changed.
+    private final Runnable companionActivated = () -> handler.post(() -> {
+        if (!isFinishing() && !isDestroyed()) recreate();
+    });
     private final Runnable minuteTick = new Runnable() {
         @Override
         public void run() {
+            if (refreshScheduledTheme()) return;
             updateGreeting();
             updateRace();
             updateWifiLabel();
@@ -305,6 +315,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         density = getResources().getDisplayMetrics().density;
         // config.xml, overlaid by config.json from a pushed theme (see Config and tools/theme.sh).
         Config cfg = Config.load(this);
+        scheduleFingerprint = CompanionBridge.effectiveThemeFingerprint(this);
         settingsKeycodes = cfg.settingsKeycodes;
         settingsKeyPanel = cfg.settingsKeyPanel;
         COLUMNS = cfg.columns;
@@ -581,6 +592,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addDataScheme("package");
         timeFilter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        timeFilter.addAction(Intent.ACTION_DATE_CHANGED);
 
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
@@ -637,12 +649,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             registerReceiver(packageReceiver, packageFilter);
             registerReceiver(timeReceiver, timeFilter);
         }
+        CompanionBridge.listen(companionActivated);
         updateClockVisibility();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        // A schedule transition while Home was hidden: reconcile once to the state for now.
+        if (refreshScheduledTheme()) return;
         // A festival that started or ended while Home was in the background: rebuild with or without it.
         if (festive != festival.active(LocalDate.now())) {
             recreate();
@@ -807,6 +822,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         started = false;
         unregisterReceiver(packageReceiver);
         unregisterReceiver(timeReceiver);
+        CompanionBridge.listen(null);
         handler.removeCallbacks(clockCheck);
         stopped = true;
         rebuildOnResume = true;
@@ -833,6 +849,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         heroArtCache.clear();
         heroArtKey = null;
         rebuildOnResume = true;
+    }
+
+    /** Rebuilds Config and the wallpaper only when a schedule changed the effective theme. */
+    private boolean refreshScheduledTheme() {
+        String current = CompanionBridge.effectiveThemeFingerprint(this);
+        if (current.equals(scheduleFingerprint)) return false;
+        recreate();
+        return true;
     }
 
     @Override
