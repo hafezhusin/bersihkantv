@@ -309,6 +309,8 @@ final class AppLibraryDialog {
             Toast.makeText(activity, R.string.library_save_failed, Toast.LENGTH_LONG).show();
             return;
         }
+        // Adding an app back to Home also undoes a tile long-press hide of the same package.
+        if (add) HiddenApps.unhide(activity, app.activityInfo.packageName);
         selectedOffset = 0;
         if (add && catalog != null) {
             RecyclerView.ViewHolder holder = catalog.findViewHolderForAdapterPosition(selectedPosition);

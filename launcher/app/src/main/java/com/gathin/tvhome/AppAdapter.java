@@ -1,6 +1,7 @@
 package com.gathin.tvhome;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -57,6 +58,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void onLibraryRequested();
         void onLibraryFocused();
         void onLibraryUp();
+
+        /** A tile was hidden from the TV UI (long-press, Hide App): rebuild the tiles, restoring focus. */
+        void onTileHidden();
     }
 
     static final class Entry {
@@ -184,6 +188,12 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private int docked, emptySlots;
     /** Never shown as tiles (res/values/config.xml, hidden_apps). */
     private final Set<String> hidden;
+    /**
+     * Hidden from the TV UI by long-pressing a tile (HiddenApps, SharedPreferences). Unlike the
+     * config list this wins over an App library "Add to Home": the owner hid this exact tile, so
+     * only unhiding (Launcher settings, or adding it from the library again) brings it back.
+     */
+    private final Set<String> hiddenOnTv = new HashSet<>();
     private final boolean animations;
     private final boolean advancedEffects;
     private final boolean showLibrary;
@@ -205,6 +215,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.favourites = cfg.dockApps;
         this.fillDock = cfg.fillDock;
         this.hidden = new HashSet<>(cfg.hiddenApps);
+        this.hiddenOnTv.addAll(HiddenApps.load(ctx));
         this.animations = cfg.animations;
         this.advancedEffects = cfg.animations && cfg.advancedEffects;
         this.showHomeSettings = cfg.showHomeSettingsShortcut;
@@ -227,6 +238,10 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
      * so focus follows it); hidden_apps wins over a card, and a card's package in dock_apps takes that slot.
      */
     void reload(List<Cards.Card> cards) {
+        // Re-read the on-TV hides every reload, so an unhide from Launcher settings or the App
+        // library takes effect at the same rebuild that applies everything else.
+        hiddenOnTv.clear();
+        hiddenOnTv.addAll(HiddenApps.load(ctx));
         PackageManager pm = ctx.getPackageManager();
         Intent probe = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
         List<ResolveInfo> found = new ArrayList<>(pm.queryIntentActivities(probe, 0));
@@ -252,7 +267,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         for (ResolveInfo ri : found) {
             if (ri.activityInfo == null) continue;
             String pkg = ri.activityInfo.packageName;
-            if (pkg.equals(ctx.getPackageName()) || !ri.activityInfo.exported
+            if (pkg.equals(ctx.getPackageName()) || !ri.activityInfo.exported || hiddenOnTv.contains(pkg)
                     || !LibraryApps.visible(tvPackages.contains(pkg), hidden.contains(pkg), added.contains(pkg), removed.contains(pkg))) continue;
             ComponentName component = new ComponentName(pkg, ri.activityInfo.name);
             Cards.Card card = cardByPkg.get(pkg);
@@ -424,14 +439,64 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {
-            Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + e.pkg));
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            try {
-                ctx.startActivity(i);
-            } catch (ActivityNotFoundException ignored) {
-            }
+            showAppMenu(e);
             return true;
         });
+    }
+
+    /**
+     * Long-press menu for a tile: Hide App, Uninstall, and App info (what a long-press opened
+     * before this menu existed). Native AlertDialog only, no extra UI weight. The "Default home"
+     * tile is the launcher's own shortcut, not an installed app: it keeps the old behaviour and
+     * opens App info directly, so Home can never hide or uninstall itself from its own grid.
+     */
+    private void showAppMenu(Entry e) {
+        if (e.kind == Entry.HOME_SETTINGS) {
+            openAppInfo(e);
+            return;
+        }
+        CharSequence[] actions = {
+                ctx.getString(R.string.hide_app),
+                ctx.getString(R.string.uninstall_app),
+                ctx.getString(R.string.library_app_info),
+        };
+        new AlertDialog.Builder(ctx)
+                .setTitle(e.label)
+                .setItems(actions, (dialog, which) -> {
+                    if (which == 0) hideApp(e);
+                    else if (which == 1) uninstallApp(e);
+                    else openAppInfo(e);
+                })
+                .show();
+    }
+
+    /** Saves the hide, then lets the activity rebuild the tiles (and restore focus to a neighbour). */
+    private void hideApp(Entry e) {
+        HiddenApps.hide(ctx, e.pkg);
+        hiddenOnTv.add(e.pkg);
+        Toast.makeText(ctx, ctx.getString(R.string.app_hidden, e.label), Toast.LENGTH_SHORT).show();
+        if (listener != null) listener.onTileHidden();
+    }
+
+    /** Hands the uninstall to the system: its own prompt confirms, and the package receiver reloads the tiles after. */
+    private void uninstallApp(Entry e) {
+        Intent i = new Intent(Intent.ACTION_UNINSTALL_PACKAGE, Uri.parse("package:" + e.pkg));
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            ctx.startActivity(i);
+        } catch (ActivityNotFoundException | SecurityException ex) {
+            Toast.makeText(ctx, ctx.getString(R.string.cant_uninstall, e.label), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** The system settings page for this app (the pre-menu long-press behaviour). */
+    private void openAppInfo(Entry e) {
+        Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + e.pkg));
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            ctx.startActivity(i);
+        } catch (ActivityNotFoundException ignored) {
+        }
     }
 
     /** Opens the tile's activity by explicit component, with no extras: a card can name nothing else. */

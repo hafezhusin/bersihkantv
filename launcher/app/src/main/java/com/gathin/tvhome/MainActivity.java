@@ -185,6 +185,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private static LocalDate lastPetalShower;
     /** hidden_apps as the adapter sees them (config.xml or a theme's config.json): a hidden app gets no card either. */
     private Set<String> hiddenApps = Collections.emptySet();
+    /** The static half of hiddenApps (config.xml / theme) before the on-TV hides are unioned in. */
+    private Set<String> configHiddenApps = Collections.emptySet();
     private List<Cards.Card> cards = Collections.emptyList();
     /** The grid has been laid out and focused since the last resume; the card prompt waits for this. */
     private boolean tilesReady;
@@ -354,7 +356,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         vpnApp = cfg.vpnApp;
         moduleCards = cfg.moduleCards;
-        hiddenApps = new HashSet<>(cfg.hiddenApps);
+        configHiddenApps = new HashSet<>(cfg.hiddenApps);
+        hiddenApps = new HashSet<>(configHiddenApps);
+        hiddenApps.addAll(HiddenApps.load(this));
 
         grid = findViewById(R.id.grid);
         rtlAppGrid = getResources().getBoolean(R.bool.rtl_app_grid);
@@ -689,6 +693,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // An updated app may bring new artwork; the backdrop is cheap to make again.
         heroArtCache.clear();
         heroArtKey = null;
+        // Rebuild the card filter as static hidden_apps plus the current on-TV hides, so a hide
+        // (or an unhide from Launcher settings) applies to cards at the same reload as the tiles.
+        hiddenApps = new HashSet<>(configHiddenApps);
+        hiddenApps.addAll(HiddenApps.load(this));
         cards = moduleCards ? CardFeature.run(() -> Cards.discover(this, hiddenApps, Cards.load(Cards.storeFile(this))), none) : none;
         adapter.reload(cards.isEmpty() ? none : CardFeature.run(() -> Cards.shown(cards), none));
         lastFocusedKey = returnKey;
@@ -1048,6 +1056,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     }
 
     // ---- glass highlight -------------------------------------------------------------------------
+
+    @Override
+    public void onTileHidden() {
+        // Same rebuild a package removal gets: the hidden tile is gone, focus lands on a neighbour.
+        reloadApps(false);
+    }
 
     @Override
     public void onLibraryRequested() {

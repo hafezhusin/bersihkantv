@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.LinearLayout;
@@ -12,7 +13,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /** Remote-friendly settings owned by the launcher; system settings stay one row away. */
 public final class LauncherSettingsActivity extends Activity {
@@ -112,6 +116,7 @@ public final class LauncherSettingsActivity extends Activity {
         });
         findViewById(R.id.tvSettingsChoice).setOnClickListener(v ->
                 open(new Intent(Settings.ACTION_SETTINGS)));
+        findViewById(R.id.hiddenAppsChoice).setOnClickListener(v -> showHiddenApps());
         refresh();
         columnChoices[Math.max(0, Math.min(columns - 4, 3))].requestFocus();
     }
@@ -164,6 +169,40 @@ public final class LauncherSettingsActivity extends Activity {
             if (images.get(i).getName().equals(name)) return i;
         }
         return -1;
+    }
+
+    /**
+     * Apps hidden from a tile's long-press menu. Choosing one unhides it; Home is rebuilt on
+     * return (setResult), so the tile is back at the next Home. An uninstalled app's stale entry
+     * is offered under its package name and unhiding it is harmless.
+     */
+    private void showHiddenApps() {
+        Set<String> hidden = HiddenApps.load(this);
+        if (hidden.isEmpty()) {
+            Toast.makeText(this, R.string.hidden_apps_none, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        List<String> packages = new ArrayList<>(hidden);
+        Collections.sort(packages);
+        PackageManager pm = getPackageManager();
+        String[] labels = new String[packages.size()];
+        for (int i = 0; i < packages.size(); i++) {
+            String pkg = packages.get(i);
+            try {
+                labels[i] = String.valueOf(pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0)));
+            } catch (PackageManager.NameNotFoundException | RuntimeException e) {
+                labels[i] = pkg;
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.hidden_apps)
+                .setItems(labels, (dialog, which) -> {
+                    HiddenApps.unhide(this, packages.get(which));
+                    setResult(RESULT_OK);
+                    if (!HiddenApps.load(this).isEmpty()) showHiddenApps();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void setAdvanced(boolean enabled) {
