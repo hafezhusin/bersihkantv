@@ -244,7 +244,7 @@ final class Config {
         File dir = dir(ctx);
         File file = dir != null ? new File(dir, FILE_NAME) : null;
         boolean mounted = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
-        JSONObject json = readOverlay(ctx, file, mounted);
+        JSONObject json = CompanionBridge.overlay(ctx, readOverlay(ctx, file, mounted));
         if (json != null) {
             applied = true;
             dock = stringList(json, "dock_apps", dock);
@@ -306,7 +306,7 @@ final class Config {
         boolean wallpaperEnabled = json == null || bool(json, "wallpaper", true);
         if (!wallpaperEnabled) wallpaper = null;
         int rotationMinutes = json == null ? 0 : integer(json, "wallpaper_rotation_minutes", 0, 0, 1440);
-        int wallpaperDim = json == null ? 0 : integer(json, "wallpaper_dim", 0, 0, 90);
+        int wallpaperDim = json == null ? 0 : integer(json, "wallpaper_dim", 0, 0, 100);
         String wallpaperOrder = json == null ? WallpaperRotation.ORDER_SHUFFLE
                 : string(json, "wallpaper_order", WallpaperRotation.ORDER_SHUFFLE);
         // An unknown order must not silently change how an existing collection rotates.
@@ -316,6 +316,14 @@ final class Config {
             wallpapers.addAll(WallpaperRotation.images(new File(dir, "wallpapers")));
         }
         if (wallpapers.isEmpty() && wallpaper != null) wallpapers.add(wallpaper);
+        // A companion collection is immutable on the TV and only appears after an explicit activation.
+        // It replaces the theme's local files for as long as it stays the active collection.
+        List<File> companionImages = CompanionBridge.selectedAssets(ctx);
+        if (wallpaperEnabled && !companionImages.isEmpty()) {
+            wallpapers.clear();
+            wallpapers.addAll(companionImages);
+            wallpaper = companionImages.get(0);
+        }
         // An on-TV wallpaper pick overrides the theme: a filename from the wallpapers/
         // collection, or "none". Unset means the theme decides (off by default).
         String wallpaperChoice = choices.getString(WALLPAPER_CHOICE_KEY, null);
@@ -436,7 +444,7 @@ final class Config {
         return json;
     }
 
-    private static JSONObject read(File file) {
+    static JSONObject read(File file) {
         if (file == null || !file.isFile()) return null;
         if (file.length() > 64 * 1024) {
             Log.w(TAG, "ignoring " + file + ": larger than 64 KB");

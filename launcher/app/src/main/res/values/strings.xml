@@ -37,6 +37,13 @@
     <string name="wallpaper_none">None</string>
     <string name="wallpaper_applied">Wallpaper changed</string>
     <string name="wallpaper_theme_default">Theme default</string>
+    <string name="theme_schedule_label">Theme schedule</string>
+    <string name="theme_schedule_state">Theme schedule: %1$s</string>
+    <string name="theme_schedule_next">Next change: %1$s</string>
+    <string name="theme_schedule_no_next">No further change in the next year</string>
+    <string name="theme_schedule_help">Switches your theme and wallpaper set at the times you choose. Turn it off to keep the theme as saved.</string>
+    <string name="theme_schedule_turn_off">Turn off</string>
+    <string name="theme_schedule_turn_on">Turn on</string>
     <string name="animations_state">Animations: %1$s</string>
     <string name="advanced_effects">Advanced effects</string>
     <string name="advanced_effects_state">Advanced effects: %1$s</string>

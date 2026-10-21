@@ -1,0 +1,6 @@
+{
+  "protocol_version": 1,
+  "launcher_version": "2.5",
+  "features": ["collections_v1", "revision_checks_v1", "readback_v1"],
+  "limits": {"asset_bytes": 20971520, "collection_bytes": 268435456, "asset_count": 200}
+}

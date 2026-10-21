@@ -1,0 +1,6 @@
+{
+  "protocol_version": 1,
+  "launcher_version": "2.4",
+  "features": [],
+  "limits": {"asset_bytes": 10485760, "collection_bytes": 0, "asset_count": 100}
+}

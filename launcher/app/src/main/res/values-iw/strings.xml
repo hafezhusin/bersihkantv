@@ -94,6 +94,13 @@
     <string name="wallpaper_none">ללא</string>
     <string name="wallpaper_applied">הטפט שונה</string>
     <string name="wallpaper_theme_default">ברירת המחדל של ערכת הנושא</string>
+    <string name="theme_schedule_label">לוח זמנים לערכת נושא</string>
+    <string name="theme_schedule_state">לוח זמנים לערכת נושא: %1$s</string>
+    <string name="theme_schedule_next">השינוי הבא: %1$s</string>
+    <string name="theme_schedule_no_next">אין שינוי נוסף בשנה הקרובה</string>
+    <string name="theme_schedule_help">מחליף את ערכת הנושא ואת קבוצת הטפטים בשעות שתבחר. כיבוי משאיר את ערכת הנושא כפי שנשמרה.</string>
+    <string name="theme_schedule_turn_off">כיבוי</string>
+    <string name="theme_schedule_turn_on">הפעלה</string>
 
     <!-- Race-weekend panel (RaceWeekend). -->
     <string name="race_kicker">סבב %1$d · %2$s · %3$s</string>
