@@ -21,6 +21,20 @@
 # activity, so the whole setup wizard package is disabled below; it is only used for first-time setup.
 # Re-enable it (and launcherx) before a factory reset or to get the Google home back: restore.sh does.
 # The firmware re-enables com.netflix.ninja by itself (Netflix button), so don't bother disabling it.
+#
+# ---- Launcher extras tested on this model (contributed by @nikhiltalreja, GitHub) ----
+# Checked on a real set on 2026-10-20, firmware UKN1.240806.017.V816.0.26.5.6.5.URTMIXM.
+#
+# This folder's config.json is a theme for those extras. Push it (no rebuild):
+#   TV_HOST=<tv ip> tools/theme.sh examples/xiaomi-tv-a-pro-2026
+# It sets bluetooth_button, so theme.sh grants BLUETOOTH_CONNECT and BLUETOOTH_SCAN.
+# The pill lists bonded accessories, then the TV's own Bluetooth screen, then a live scan that
+# pairs in place. This firmware's settings scanner finds devices but never lists them.
+#
+# app_keys in that theme sends the YouTube button (KEYCODE_BUTTON_3) to YouTube and the LIV button
+# (KEYCODE_BUTTON_8) to Apple TV. With launcherx disabled those keys otherwise do nothing, or LIV
+# still deep-links SonyLIV. They need INPUT_KEY_SERVICE=1 or HOME_KEY_SERVICE=1 at install; both
+# read app_keys. Home here is KEYCODE_HOME once launcherx is gone.
 
 # Xiaomi + Google telemetry
 com.miui.tv.analytics

@@ -17,6 +17,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Bez připojení</string>
     <string name="not_available">Na této televizi není k dispozici</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Bluetooth televizoru</string>
+    <string name="bt_radio_busy">Bluetooth zaneprázdněno — zkuste znovu</string>
+    <string name="bt_failed">Párování se nezdařilo</string>
+    <string name="bt_pairing">Párování…</string>
+    <string name="bt_paired">Spárováno</string>
+    <string name="bt_failed_retry">Nespárováno — zkuste znovu</string>
     <string name="cant_open">Nelze otevřít: %1$s</string>
     <string name="date_format">EEEE d. MMMM</string>
     <string name="dream_name">Hodiny</string>

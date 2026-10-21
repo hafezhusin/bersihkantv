@@ -17,6 +17,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Hors ligne</string>
     <string name="not_available">Indisponible sur cette TV</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Bluetooth du téléviseur</string>
+    <string name="bt_radio_busy">Bluetooth occupé — réessayez</string>
+    <string name="bt_failed">Échec de l\'appairage</string>
+    <string name="bt_pairing">Appairage…</string>
+    <string name="bt_paired">Appairé</string>
+    <string name="bt_failed_retry">Non appairé — réessayez</string>
     <string name="cant_open">Impossible d\'ouvrir %1$s</string>
     <string name="date_format">EEEE d MMMM</string>
     <string name="stats_cpu">CPU %1$d%%</string>

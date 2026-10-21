@@ -60,6 +60,14 @@
          (XGIMI projectors: com.xgimi.action.hdmiPlayer). Leave empty to omit. -->
     <string name="input_action" translatable="false"></string>
 
+    <!-- Bluetooth pill, next to Inputs. Off unless set here or in a theme ("bluetooth_button": true).
+         build-and-install grants BLUETOOTH_CONNECT and BLUETOOTH_SCAN only when this is true; theme.sh
+         grants them when the pushed theme turns it on. The fallback row opens the TV's Bluetooth screen;
+         set the address and name of an accessory to open its Connect / Disconnect / Unpair page once bonded. -->
+    <bool name="bluetooth_button">false</bool>
+    <string name="bluetooth_speaker_address" translatable="false"></string>
+    <string name="bluetooth_speaker_name" translatable="false"></string>
+
     <!-- Remote buttons that open Settings, by Linux scancode (HOME_KEY_SERVICE=1 build-and-install.sh). Remotes
          that send KEYCODE_SETTINGS need no entry. Some send a code Android does not map: the Xiaomi/Fengmi
          projector remote's gear button is scancode 384 (KEY_TAPE). Find yours with

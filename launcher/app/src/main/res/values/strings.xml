@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Home</string>
     <string name="inputs">Inputs</string>
+    <string name="bluetooth">Bluetooth</string>
     <string name="wifi">Wi-Fi</string>
     <string name="settings">Settings</string>
     <string name="choose_input">Inputs</string>
@@ -17,6 +18,12 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Offline</string>
     <string name="not_available">Not available on this TV</string>
+    <string name="bt_screen_row">TV Bluetooth</string>
+    <string name="bt_radio_busy">Bluetooth busy — try again</string>
+    <string name="bt_failed">Pairing failed</string>
+    <string name="bt_pairing">Pairing…</string>
+    <string name="bt_paired">Paired</string>
+    <string name="bt_failed_retry">Not paired — tap to retry</string>
     <string name="cant_open">Can\'t open %1$s</string>
     <string name="date_format">EEEE  d MMMM</string>
     <!-- Date next to the clock on Home; a locale can split it over two lines with \n. -->

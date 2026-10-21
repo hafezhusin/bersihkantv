@@ -70,7 +70,7 @@ A home screen that looks like an Apple TV and gets out of the way:
 | **A top shelf** | Names the focused app in large type, with an ambient glow in a colour taken from its artwork. |
 | **The rest of your apps in a grid** | Slides up when you press Down. |
 | **One floating glass highlight** | Springs from tile to tile. The focused tile lifts and shows its name. |
-| **Three frosted buttons** | Inputs (HDMI ports under the names you gave them in the TV's settings, AV, Live TV), Wi-Fi or Ethernet with the network name, Settings. |
+| **Three frosted buttons** | Inputs (HDMI ports under the names you gave them in the TV's settings, AV, Live TV), Wi-Fi or Ethernet with the network name, Settings. A Bluetooth pill joins them when `bluetooth_button` is on. |
 | **A greeting, a thin clock and the date** | In [Outfit](https://fonts.google.com/specimen/Outfit), and a matching Clock screensaver. Set `show_stats` in config or a theme for one line under the clock: CPU, free memory and free storage. It stays off unless you turn it on, and it refreshes only while Home is on screen. |
 | **Themes and module cards** | Themes change colours, wallpaper, dock and columns without a rebuild, and module cards let other apps plug a tile in, only with your say-so. |
 
@@ -381,6 +381,7 @@ The **TV** needs Android 8.0 (API 26) or newer: `minSdk` is a compile-time floor
 | **Module cards** | Any TV app can offer its own tile; you approve each one once. See [`docs/modules.md`](docs/modules.md) |
 | **Clock screensaver** | A drifting clock over the glow, so nothing burns in |
 | **Remote keys** | Keeps the Input, YouTube and gear buttons working after the stock launcher is gone |
+| **Bluetooth pill** | Optional (`bluetooth_button`): bonded accessories, the TV Bluetooth screen, and a live scan that pairs in place |
 
 <details>
 <summary><b>Build it yourself</b></summary>
@@ -396,7 +397,8 @@ and `sdkmanager "platforms;android-34" "build-tools;34.0.0"`. On Linux the insta
 
 [`config.xml`](launcher/app/src/main/res/values/config.xml) sets the dock order, hidden apps, the Live TV
 package, columns (tiles shrink from 5 up), rows under the dock, an optional VPN app for the network pill,
-and `reduced_motion` for TVs whose GPU cannot keep up. Themes set the same keys plus a background colour
+an optional Bluetooth pill (`bluetooth_button`, off unless set), and `reduced_motion` for TVs whose GPU
+cannot keep up. Themes set the same keys plus a background colour
 and a wallpaper.
 
 </details>
@@ -463,6 +465,18 @@ tools/tv.py 'settings put secure screensaver_components com.gathin.tvhome/.Clock
   **gear** button, even one Android does not map (scancodes or keycodes in config.xml).
 - With `settings_key_panel` the gear opens a [small quick settings panel](docs/quick-settings-panel.jpg)
   over Home or any app: TV settings, Display, Network, Apps and Launcher settings.
+
+</details>
+
+<details>
+<summary><b>Bluetooth pill</b></summary>
+
+Off unless `bluetooth_button` is set in config.xml or a theme. It lists bonded accessories first, then the
+TV's own Bluetooth screen, then a live scan that pairs in place. On firmware whose settings scanner finds
+devices but never lists them, this is the way to pair earbuds. Set `bluetooth_speaker_name` and
+`bluetooth_speaker_address` in config.xml so the fallback row opens your buds' Connect / Disconnect / Unpair
+page. `build-and-install` grants `BLUETOOTH_CONNECT` and `BLUETOOTH_SCAN` only when the key is on in
+config.xml; a theme that turns it on is granted by `theme.sh` / `theme.ps1`.
 
 </details>
 

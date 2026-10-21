@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">בית</string>
     <string name="inputs">כניסות</string>
+    <string name="bluetooth">בלוטות׳</string>
     <string name="wifi">Wi-Fi</string>
     <string name="settings">הגדרות</string>
     <string name="choose_input">כניסות</string>
@@ -17,6 +18,12 @@
     <string name="ethernet">רשת קווית</string>
     <string name="offline">אין חיבור לרשת</string>
     <string name="not_available">לא זמין בטלוויזיה זו</string>
+    <string name="bt_screen_row">מסך בלוטות׳ של הטלוויזיה</string>
+    <string name="bt_radio_busy">הרדיו עסוק — יש לסגור ולנסות שוב</string>
+    <string name="bt_failed">הצימוד נכשל</string>
+    <string name="bt_pairing">מצמד…</string>
+    <string name="bt_paired">צומד</string>
+    <string name="bt_failed_retry">לא צומד — יש להקיש לניסיון חוזר</string>
     <string name="cant_open">לא ניתן לפתוח את %1$s</string>
     <string name="date_format">EEEE  d בMMMM</string>
     <string name="stats_cpu">CPU %1$d%%</string>

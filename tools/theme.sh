@@ -73,5 +73,9 @@ if [ -d "$THEME/wallpapers" ]; then
   done
 fi
 tv "printf '%s' '$REVISION' > $TMP-theme_revision; $(put theme_revision)" >/dev/null
+# The pill is off by default; grant only when this theme turns it on. A missing package must not fail the push.
+if "$PY" -I -c 'import json,sys; raise SystemExit(0 if json.load(open(sys.argv[1])).get("bluetooth_button") is True else 1)' "$THEME/config.json"; then
+  tv "pm grant $PKG android.permission.BLUETOOTH_CONNECT 2>/dev/null; pm grant $PKG android.permission.BLUETOOTH_SCAN 2>/dev/null; echo bluetooth-granted" >/dev/null || true
+fi
 tv "$RESTART; echo applied" | tail -n 1
 echo "Theme $(basename "$THEME") is on the TV. Undo with: tools/theme.sh --reset"

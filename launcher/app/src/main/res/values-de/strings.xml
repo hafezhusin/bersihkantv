@@ -17,6 +17,13 @@
     <string name="ethernet">LAN</string>
     <string name="offline">Offline</string>
     <string name="not_available">Auf diesem TV nicht verfügbar</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Bluetooth am TV</string>
+    <string name="bt_radio_busy">Bluetooth belegt – erneut versuchen</string>
+    <string name="bt_failed">Kopplung fehlgeschlagen</string>
+    <string name="bt_pairing">Koppeln…</string>
+    <string name="bt_paired">Gekoppelt</string>
+    <string name="bt_failed_retry">Nicht gekoppelt – erneut tippen</string>
     <string name="cant_open">%1$s lässt sich nicht öffnen</string>
     <string name="date_format">EEEE, d. MMMM</string>
     <!-- Two lines next to the clock: the long German weekday and month names do not fit on one. -->

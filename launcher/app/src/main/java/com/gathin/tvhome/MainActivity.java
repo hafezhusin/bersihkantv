@@ -1,9 +1,13 @@
 package com.gathin.tvhome;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.Dialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -11,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -80,6 +85,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -144,6 +150,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView greeting;
     private View clockBlock;
     private View btnInputs;
+    private View btnBluetooth;
     private TextView btnWifi;
     /** The network pill's icon as last set, so a refresh that changes nothing does not lay the top bar out again. */
     private int wifiIcon;
@@ -508,8 +515,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         }
 
+        btnBluetooth = findViewById(R.id.btnBluetooth);
         btnInputs = findViewById(R.id.btnInputs);
         View btnSettings = findViewById(R.id.btnSettings);
+        btnBluetooth.setOnClickListener(v -> showBtPairPanel());
+        if (!cfg.bluetoothButton || BluetoothAdapter.getDefaultAdapter() == null) btnBluetooth.setVisibility(View.GONE);
         btnInputs.setOnClickListener(v -> showInputs());
         btnWifi.setOnClickListener(v -> openNetworkPill());
         btnWifi.setOnLongClickListener(v -> {
@@ -550,19 +560,21 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 focusTile(lastFocused % COLUMNS);
                 return true;
             }
-            int firstButton = btnInputs.getVisibility() == View.VISIBLE ? R.id.btnInputs : firstTopButton().getId();
+            int firstButton = btnBluetooth.getVisibility() == View.VISIBLE ? R.id.btnBluetooth
+                    : btnInputs.getVisibility() == View.VISIBLE ? R.id.btnInputs : firstTopButton().getId();
             int leftButton = rtlMenuBar ? R.id.btnSettings : firstButton;
             int rightButton = rtlMenuBar ? firstButton : R.id.btnSettings;
             if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) return v.getId() == leftButton;
             return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v.getId() == rightButton;
         };
+        btnBluetooth.setOnKeyListener(pillKeys);
         btnInputs.setOnKeyListener(pillKeys);
         btnWifi.setOnKeyListener(pillKeys);
         btnSettings.setOnKeyListener(pillKeys);
         btnReorder.setOnKeyListener(pillKeys);
         btnLibraryTop.setOnKeyListener(pillKeys);
         if (advancedEffects) {
-            for (View button : new View[]{btnInputs, btnWifi, btnReorder, btnLibraryTop, btnSettings}) {
+            for (View button : new View[]{btnBluetooth, btnInputs, btnWifi, btnReorder, btnLibraryTop, btnSettings}) {
                 button.setOnFocusChangeListener((view, focused) -> view.animate()
                         .scaleX(focused ? 1.04f : 1f).scaleY(focused ? 1.04f : 1f)
                         .setDuration(160).start());
@@ -2227,7 +2239,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
             startActivity(i);
-        } catch (ActivityNotFoundException e) {
+        } catch (ActivityNotFoundException | SecurityException e) {
             Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
         }
     }
@@ -2455,6 +2467,172 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             action.run();
         });
         rows.addView(row);
+    }
+
+    /** The TV's Bluetooth accessory screen. This firmware has no ACTION_BLUETOOTH_SETTINGS activity:
+     *  when the configured earbuds are bonded their per-device page opens (Connect / Disconnect /
+     *  Unpair), otherwise the pairing scanner. Both require the caller to hold BLUETOOTH_CONNECT. */
+    private Intent bluetoothIntent() {
+        String addr = getString(R.string.bluetooth_speaker_address).trim();
+        if (!addr.isEmpty() && isBonded(addr)) {
+            return btPageIntent(addr, getString(R.string.bluetooth_speaker_name));
+        }
+        return new Intent().setComponent(new ComponentName("com.android.tv.settings",
+                "com.android.tv.settings.accessories.AddAccessoryActivity"));
+    }
+
+    /** The per-device Bluetooth screen: Connect / Disconnect / Unpair / battery for one accessory. */
+    private Intent btPageIntent(String addr, String name) {
+        Intent i = new Intent().setComponent(new ComponentName("com.android.tv.settings",
+                "com.android.tv.settings.accessories.BluetoothAccessoryActivity"))
+                .putExtra("accessory_address", addr);
+        if (name != null && !name.isEmpty()) i.putExtra("accessory_name", name);
+        return i;
+    }
+
+    /** BLUETOOTH_CONNECT/SCAN exist from Android 12; older releases grant the legacy pair at install. */
+    private boolean hasBtPermissions() {
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+                || (checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+                && checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED);
+    }
+
+    // Lint cannot follow hasBtPermissions(); this method returns before any Bluetooth call.
+    @SuppressLint("MissingPermission")
+    private boolean isBonded(String addr) {
+        if (!hasBtPermissions()) return false;
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> bonded = adapter != null ? adapter.getBondedDevices() : null;
+        if (bonded == null) return false;
+        for (BluetoothDevice d : bonded) if (addr.equals(d.getAddress())) return true;
+        return false;
+    }
+
+    /** The TV's own scan UI is broken on some firmware: the stack finds devices (verified in the
+     *  radio logs) but the settings app never lists them. So the pill opens the launcher's own
+     *  discovery panel; tapping a device bonds it directly, no settings screen involved.
+     *  A row at the top still opens the TV screen for remotes and other accessories.
+     *  Lint cannot follow hasBtPermissions(); it is checked below before any Bluetooth call. */
+    @SuppressLint("MissingPermission")
+    private void showBtPairPanel() {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null || !hasBtPermissions() || !adapter.isEnabled()) {
+            Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (openPopup != null) openPopup.dismiss();
+        View anchor = btnBluetooth;
+        View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
+        LinearLayout rows = panel.findViewById(R.id.rows);
+        int width = Math.max(anchor.getWidth(), (int) (150 * density));
+        final PopupWindow popup = glassPopup(panel, width);
+
+        // One map entry per device, so repeat results update the row instead of piling up.
+        Map<String, View> rowByAddr = new LinkedHashMap<>();
+
+        // Bonded accessories first (their rows open their system page: Connect / Disconnect / Unpair).
+        Set<BluetoothDevice> bonded = adapter.getBondedDevices();
+        if (bonded != null) for (BluetoothDevice d : bonded) btAddRow(rows, popup, d, rowByAddr);
+
+        // Fallback for remotes and anything the launcher's scan can't bond: the TV's own screen.
+        addInputRow(rows, popup, R.drawable.ic_bluetooth, getString(R.string.bt_screen_row), -1,
+                () -> open(bluetoothIntent()));
+
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                BluetoothDevice d = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (d == null) return;
+                boolean bondedAlready = d.getBondState() != BluetoothDevice.BOND_NONE;
+                if (BluetoothDevice.ACTION_BOND_STATE_CHANGED.equals(intent.getAction())) {
+                    btRowState(rowByAddr, popup, d);
+                    return;
+                }
+                if (bondedAlready || rowByAddr.containsKey(d.getAddress())) return;   // bonded rows are already listed
+                btAddRow(rows, popup, d, rowByAddr);
+                // The panel grows with every device found: refit and widen, within reason.
+                panel.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+                popup.setWidth(Math.min(Math.max(width, panel.getMeasuredWidth()), (int) (420 * density)));
+            }
+        };
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
+        registerReceiver(receiver, filter);
+        popup.setOnDismissListener(() -> {
+            if (openPopup == popup) openPopup = null;
+            if (adapter.isDiscovering()) adapter.cancelDiscovery();
+            try { unregisterReceiver(receiver); } catch (IllegalArgumentException ignored) { }
+        });
+
+        if (!adapter.startDiscovery()) {
+            addSeparator(rows);
+            View busy = getLayoutInflater().inflate(R.layout.item_input, rows, false);
+            ((ImageView) busy.findViewById(R.id.icon)).setImageResource(R.drawable.ic_bluetooth);
+            ((TextView) busy.findViewById(R.id.title)).setText(R.string.bt_radio_busy);
+            busy.findViewById(R.id.status).setVisibility(View.GONE);
+            busy.findViewById(R.id.dot).setVisibility(View.GONE);
+            rows.addView(busy);
+        }
+        panel.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        popup.setWidth(Math.max(width, panel.getMeasuredWidth()));
+        dropIn(popup, panel, anchor, getResources().getBoolean(R.bool.rtl_menu_bar)
+                ? Gravity.END : Gravity.START);
+        rows.getChildAt(0).requestFocus();
+    }
+
+    /** First sighting of a device: its row appears inline below the earlier ones. */
+    // Rows are only created after showBtPairPanel() checked hasBtPermissions().
+    @SuppressLint("MissingPermission")
+    private void btAddRow(LinearLayout rows, PopupWindow popup, BluetoothDevice d, Map<String, View> rowByAddr) {
+        String addr = d.getAddress();
+        if (rowByAddr.containsKey(addr)) return;
+        boolean bondedAlready = d.getBondState() != BluetoothDevice.BOND_NONE;
+        View row = getLayoutInflater().inflate(R.layout.item_input, rows, false);
+        ((ImageView) row.findViewById(R.id.icon)).setImageResource(R.drawable.ic_bluetooth);
+        String name = d.getName();
+        ((TextView) row.findViewById(R.id.title)).setText(
+                name != null && !name.isEmpty() ? name : addr);
+        TextView status = row.findViewById(R.id.status);
+        status.setVisibility(View.GONE);
+        row.findViewById(R.id.dot).setVisibility(View.GONE);
+        if (bondedAlready) {
+            // Tap opens the accessory's system page (Connect / Disconnect / Unpair / battery).
+            row.setOnClickListener(v -> { popup.dismiss(); open(btPageIntent(addr, name)); });
+        } else {
+            row.setOnClickListener(v -> {
+                if (d.getBondState() != BluetoothDevice.BOND_NONE) {
+                    Toast.makeText(MainActivity.this, R.string.bt_failed, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!d.createBond()) {
+                    Toast.makeText(MainActivity.this, R.string.bt_failed, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                status.setText(R.string.bt_pairing);
+                status.setVisibility(View.VISIBLE);
+                row.findViewById(R.id.dot).setVisibility(View.VISIBLE);
+            });
+        }
+        rows.addView(row);
+        rowByAddr.put(addr, row);
+    }
+
+    /** Bond process outcome lands on the row: pairing in progress, paired (panel closes), or failed. */
+    // Receives bond broadcasts only while the panel (and its permission check) is alive.
+    @SuppressLint("MissingPermission")
+    private void btRowState(Map<String, View> rowByAddr, PopupWindow popup, BluetoothDevice d) {
+        View row = rowByAddr.get(d.getAddress());
+        if (row == null) return;
+        TextView status = row.findViewById(R.id.status);
+        if (d.getBondState() == BluetoothDevice.BOND_BONDING) {
+            status.setText(R.string.bt_pairing);
+            status.setVisibility(View.VISIBLE);
+        } else if (d.getBondState() == BluetoothDevice.BOND_BONDED) {
+            popup.dismiss();
+            Toast.makeText(this, R.string.bt_paired, Toast.LENGTH_SHORT).show();
+        } else {
+            status.setText(R.string.bt_failed_retry);
+            status.setVisibility(View.VISIBLE);
+        }
     }
 
     // ---- launcher settings and module cards -------------------------------------------------------

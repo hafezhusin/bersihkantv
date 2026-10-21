@@ -17,6 +17,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Offline</string>
     <string name="not_available">Niet beschikbaar op deze tv</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Bluetooth op tv</string>
+    <string name="bt_radio_busy">Bluetooth bezet — probeer opnieuw</string>
+    <string name="bt_failed">Koppelen mislukt</string>
+    <string name="bt_pairing">Koppelen…</string>
+    <string name="bt_paired">Gekoppeld</string>
+    <string name="bt_failed_retry">Niet gekoppeld — probeer opnieuw</string>
     <string name="cant_open">Kan %1$s niet openen</string>
     <string name="date_format">EEEE d MMMM</string>
     <string name="stats_cpu">CPU %1$d%%</string>

@@ -18,6 +18,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Mất mạng</string>
     <string name="not_available">TV này không hỗ trợ</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Bluetooth của TV</string>
+    <string name="bt_radio_busy">Bluetooth đang bận — thử lại</string>
+    <string name="bt_failed">Ghép nối không thành công</string>
+    <string name="bt_pairing">Đang ghép nối…</string>
+    <string name="bt_paired">Đã ghép nối</string>
+    <string name="bt_failed_retry">Chưa ghép nối — thử lại</string>
     <string name="cant_open">Không mở được %1$s</string>
     <!-- "Thứ Hai, 20 tháng 10" -->
     <string name="date_format">EEEE, d MMMM</string>

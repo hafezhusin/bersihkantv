@@ -17,6 +17,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Çevrimdışı</string>
     <string name="not_available">Bu TV’de kullanılamıyor</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">TV Bluetooth</string>
+    <string name="bt_radio_busy">Bluetooth meşgul — yeniden dene</string>
+    <string name="bt_failed">Eşleştirme başarısız</string>
+    <string name="bt_pairing">Eşleştiriliyor…</string>
+    <string name="bt_paired">Eşleştirildi</string>
+    <string name="bt_failed_retry">Eşleştirilmedi — yeniden dene</string>
     <string name="cant_open">%1$s açılamıyor</string>
     <string name="date_format">d MMMM EEEE</string>
     <string name="stats_cpu">CPU %1$d%%</string>

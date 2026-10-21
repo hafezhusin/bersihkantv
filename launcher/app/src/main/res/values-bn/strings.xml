@@ -17,6 +17,13 @@
     <string name="ethernet">ইথারনেট</string>
     <string name="offline">অফলাইন</string>
     <string name="not_available">এই টিভিতে এভাইলেবল নেই</string>
+    <string name="bluetooth">ব্লুটুথ</string>
+    <string name="bt_screen_row">টিভির ব্লুটুথ</string>
+    <string name="bt_radio_busy">ব্লুটুথ ব্যস্ত — আবার চেষ্টা করুন</string>
+    <string name="bt_failed">পেয়ারিং ব্যর্থ হয়েছে</string>
+    <string name="bt_pairing">পেয়ারিং হচ্ছে…</string>
+    <string name="bt_paired">পেয়ার করা হয়েছে</string>
+    <string name="bt_failed_retry">পেয়ার হয়নি — আবার চেষ্টা করুন</string>
     <string name="cant_open">%1$s খোলা যাচ্ছে না</string>
     <!-- "মঙ্গলবার, ২০ অক্টোবর"; Android writes the numbers in Bangla digits. -->
     <string name="date_format">EEEE, d MMMM</string>

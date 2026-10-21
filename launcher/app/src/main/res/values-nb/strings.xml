@@ -17,6 +17,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Frakoblet</string>
     <string name="not_available">Ikke tilgjengelig på denne TV-en</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Bluetooth på TV-en</string>
+    <string name="bt_radio_busy">Bluetooth opptatt — prøv igjen</string>
+    <string name="bt_failed">Paring mislyktes</string>
+    <string name="bt_pairing">Parer…</string>
+    <string name="bt_paired">Paret</string>
+    <string name="bt_failed_retry">Ikke paret – prøv igjen</string>
     <string name="cant_open">Kan ikke åpne %1$s</string>
     <string name="date_format">EEEE d. MMMM</string>
     <string name="stats_cpu">Prosessor %1$d%%</string>

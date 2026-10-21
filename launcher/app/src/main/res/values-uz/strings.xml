@@ -17,6 +17,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Internet yoʻq</string>
     <string name="not_available">Bu televizorda mavjud emas</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Televizor Bluetooth</string>
+    <string name="bt_radio_busy">Bluetooth band — qayta urinib ko‘ring</string>
+    <string name="bt_failed">Juftlash amalga oshmadi</string>
+    <string name="bt_pairing">Juftlanmoqda…</string>
+    <string name="bt_paired">Juftlangan</string>
+    <string name="bt_failed_retry">Juftlanmagan — qayta urinib ko‘ring</string>
     <string name="cant_open">%1$s ochilmadi</string>
     <string name="date_format">EEEE  d-MMMM</string>
     <string name="stats_cpu">Protsessor %1$d%%</string>

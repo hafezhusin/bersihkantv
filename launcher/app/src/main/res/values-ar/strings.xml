@@ -17,6 +17,13 @@
     <string name="ethernet">إيثرنت</string>
     <string name="offline">غير متصل</string>
     <string name="not_available">غير متاح على هذا التلفاز</string>
+    <string name="bluetooth">بلوتوث</string>
+    <string name="bt_screen_row">بلوتوث التلفاز</string>
+    <string name="bt_radio_busy">البلوتوث مشغول — أعد المحاولة</string>
+    <string name="bt_failed">فشل الاقتران</string>
+    <string name="bt_pairing">جارٍ الاقتران…</string>
+    <string name="bt_paired">مقترن</string>
+    <string name="bt_failed_retry">غير مقترن — اضغط للمحاولة</string>
     <string name="cant_open">تعذّر فتح %1$s</string>
     <string name="date_format">EEEE  d MMMM</string>
     <string name="stats_cpu">CPU %1$d%%</string>

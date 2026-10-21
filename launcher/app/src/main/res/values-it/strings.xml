@@ -14,6 +14,13 @@
     <string name="good_night">Buonanotte</string>
     <string name="offline">Offline</string>
     <string name="not_available">Non disponibile su questa TV</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Bluetooth del TV</string>
+    <string name="bt_radio_busy">Bluetooth occupato: riprova</string>
+    <string name="bt_failed">Associazione non riuscita</string>
+    <string name="bt_pairing">Associazione in corso…</string>
+    <string name="bt_paired">Associato</string>
+    <string name="bt_failed_retry">Non associato: riprova</string>
     <string name="cant_open">Impossibile aprire %1$s</string>
     <string name="stats_cpu">CPU %1$d%%</string>
     <string name="stats_memory">Memoria: %1$d MB liberi</string>

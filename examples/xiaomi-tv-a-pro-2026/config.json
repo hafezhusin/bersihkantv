@@ -1,0 +1,7 @@
+{
+  "bluetooth_button": true,
+  "app_keys": [
+    "KEYCODE_BUTTON_3:com.google.android.youtube.tv",
+    "KEYCODE_BUTTON_8:com.apple.atve.androidtv.appletv"
+  ]
+}

@@ -115,8 +115,18 @@ if ! printf '%s' "$START_OUT" | grep -qF 'Status: ok' || printf '%s' "$START_OUT
   echo "ERROR: the new launcher did not start (see above); $STOCK_LAUNCHER was left enabled." >&2
   exit 1
 fi
+# Bluetooth grants only when the pill is on in config.xml. A theme that turns it on is granted by theme.sh.
+GRANTS=(
+  "pm grant com.gathin.tvhome android.permission.ACCESS_FINE_LOCATION 2>/dev/null; echo location-granted"
+)
+if grep -q 'name="bluetooth_button">true<' app/src/main/res/values/config.xml; then
+  GRANTS+=(
+    "pm grant com.gathin.tvhome android.permission.BLUETOOTH_CONNECT 2>/dev/null; echo bluetooth-connect-granted"
+    "pm grant com.gathin.tvhome android.permission.BLUETOOTH_SCAN 2>/dev/null; echo bluetooth-scan-granted"
+  )
+fi
 printf '%s\n' \
-  "pm grant com.gathin.tvhome android.permission.ACCESS_FINE_LOCATION 2>/dev/null; echo location-granted" \
+  "${GRANTS[@]}" \
   "cmd package compile -m speed -f com.gathin.tvhome" \
   "$DISABLE_STOCK" \
   "cmd package set-home-activity --user 0 com.gathin.tvhome/.MainActivity" \
@@ -184,7 +194,8 @@ esac
 #                         app; Google TV needs this once the stock launcher is gone (InputKeyService).
 #                         It also handles input_key_keycodes and app_keys (config.xml or a theme; a YouTube button)
 #   HOME_KEY_SERVICE=1    remotes whose Home button sends KEYCODE_ALL_APPS instead of HOME, e.g. Xiaomi
-#                         sticks: the key is routed to the launcher (HomeKeyService)
+#                         sticks: the key is routed to the launcher, and settings_key_* plus
+#                         app_keys in config.xml or a theme are applied (HomeKeyService)
 enable_service() {   # appends to enabled_accessibility_services without dropping other services
   svc=com.gathin.tvhome/.$1
   "$PY" -I ../tools/tv.py "s=\$(settings get secure enabled_accessibility_services); case \"\$s\" in *$1*) ;; null|'') settings put secure enabled_accessibility_services $svc ;; *) settings put secure enabled_accessibility_services \"\$s:$svc\" ;; esac; settings put secure accessibility_enabled 1; echo $1 enabled"

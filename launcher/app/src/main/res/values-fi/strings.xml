@@ -17,6 +17,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Ei yhteyttä</string>
     <string name="not_available">Ei käytettävissä tässä televisiossa</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">TV:n Bluetooth</string>
+    <string name="bt_radio_busy">Bluetooth varattu – yritä uudelleen</string>
+    <string name="bt_failed">Pariliittäminen epäonnistui</string>
+    <string name="bt_pairing">Pariliitetään…</string>
+    <string name="bt_paired">Pariliitetty</string>
+    <string name="bt_failed_retry">Ei pariliitetty – yritä uudelleen</string>
     <string name="cant_open">Ei voitu avata: %1$s</string>
     <!-- Finnish: "tiistaina 20. lokakuuta"; the weekday comes out in the essive form. -->
     <string name="date_format">EEEE d. MMMM</string>

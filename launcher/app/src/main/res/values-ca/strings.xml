@@ -17,6 +17,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Sense connexió</string>
     <string name="not_available">No disponible en aquest televisor</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Bluetooth del TV</string>
+    <string name="bt_radio_busy">Bluetooth ocupat: torna-ho a provar</string>
+    <string name="bt_failed">No s\'ha pogut aparellar</string>
+    <string name="bt_pairing">Aparellant…</string>
+    <string name="bt_paired">Aparellat</string>
+    <string name="bt_failed_retry">No aparellat: torna-ho a provar</string>
     <string name="cant_open">No s\'ha pogut obrir %1$s</string>
     <string name="stats_cpu">CPU %1$d%%</string>
     <string name="stats_memory">Memòria %1$d MB lliures</string>

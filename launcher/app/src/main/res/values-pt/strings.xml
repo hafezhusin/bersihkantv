@@ -17,6 +17,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Sem conexão</string>
     <string name="not_available">Não disponível nesta TV</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Bluetooth da TV</string>
+    <string name="bt_radio_busy">Bluetooth ocupado — tente novamente</string>
+    <string name="bt_failed">Falha ao emparelhar</string>
+    <string name="bt_pairing">A emparelhar…</string>
+    <string name="bt_paired">Emparelhado</string>
+    <string name="bt_failed_retry">Não emparelhado — tente novamente</string>
     <string name="cant_open">Não foi possível abrir %1$s</string>
     <string name="date_format">EEEE  d \'de\' MMMM</string>
     <string name="date_format_home">EEEE\nd \'de\' MMMM</string>

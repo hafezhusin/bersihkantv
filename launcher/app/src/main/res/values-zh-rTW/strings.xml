@@ -17,6 +17,13 @@
     <string name="ethernet">有線網路</string>
     <string name="offline">未連上網路</string>
     <string name="not_available">這台電視不支援此功能</string>
+    <string name="bluetooth">藍牙</string>
+    <string name="bt_screen_row">電視藍牙</string>
+    <string name="bt_radio_busy">藍牙忙碌 — 請重試</string>
+    <string name="bt_failed">配對失敗</string>
+    <string name="bt_pairing">正在配對…</string>
+    <string name="bt_paired">已配對</string>
+    <string name="bt_failed_retry">未配對 — 重試</string>
     <string name="cant_open">無法開啟 %1$s</string>
     <string name="date_format">M月d日 EEEE</string>
     <string name="stats_cpu">CPU %1$d%%</string>

@@ -17,6 +17,13 @@
     <string name="ethernet">Ethernet</string>
     <string name="offline">Luring</string>
     <string name="not_available">Tidak tersedia di TV ini</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="bt_screen_row">Bluetooth TV</string>
+    <string name="bt_radio_busy">Bluetooth sibuk — coba lagi</string>
+    <string name="bt_failed">Pemasangan gagal</string>
+    <string name="bt_pairing">Memasangkan…</string>
+    <string name="bt_paired">Terpasang</string>
+    <string name="bt_failed_retry">Belum terpasang — coba lagi</string>
     <string name="cant_open">Tidak dapat membuka %1$s</string>
     <string name="stats_cpu">CPU %1$d%%</string>
     <string name="stats_memory">Memori %1$d MB tersisa</string>

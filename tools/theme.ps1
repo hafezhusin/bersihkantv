@@ -61,5 +61,9 @@ if (Test-Path $wallpapers -PathType Container) {
     }
 }
 & $py -I tv.py "printf '%s' '$revision' > $tmp-theme_revision; $(Put 'theme_revision')" | Out-Null
+# The pill is off by default; grant only when this theme turns it on.
+if ((Get-Content $config -Raw | ConvertFrom-Json).bluetooth_button -eq $true) {
+    & $py -I tv.py "pm grant $pkg android.permission.BLUETOOTH_CONNECT 2>/dev/null; pm grant $pkg android.permission.BLUETOOTH_SCAN 2>/dev/null; echo bluetooth-granted" | Out-Null
+}
 & $py -I tv.py "$restart; echo applied"
 Write-Host "Theme $(Split-Path $Theme -Leaf) is on the TV. Undo with: tools\theme.ps1 -TvHost $TvHost -Reset"

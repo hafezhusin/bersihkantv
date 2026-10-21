@@ -31,6 +31,13 @@
     <string name="ethernet">有线网络</string>
     <string name="offline">未连接网络</string>
     <string name="not_available">此电视不支持该功能</string>
+    <string name="bluetooth">蓝牙</string>
+    <string name="bt_screen_row">电视蓝牙</string>
+    <string name="bt_radio_busy">蓝牙正忙 — 请重试</string>
+    <string name="bt_failed">配对失败</string>
+    <string name="bt_pairing">正在配对…</string>
+    <string name="bt_paired">已配对</string>
+    <string name="bt_failed_retry">未配对 — 重试</string>
     <string name="cant_open">无法打开 %1$s</string>
     <string name="date_format">M月d日 EEEE</string>
     <string name="stats_cpu">CPU %1$d%%</string>
