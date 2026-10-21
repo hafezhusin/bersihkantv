@@ -20,6 +20,7 @@ public final class LauncherSettingsActivity extends Activity {
     private final TextView[] columnChoices = new TextView[4];
     private final TextView[] rowChoices = new TextView[4];
     private TextView wallpaperChoice;
+    private TextView appOrderChoice;
     private TextView animationsChoice;
     private TextView advancedChoice;
     private TextView followThemeChoice;
@@ -71,6 +72,8 @@ public final class LauncherSettingsActivity extends Activity {
         }
         wallpaperChoice = findViewById(R.id.wallpaperChoice);
         wallpaperChoice.setOnClickListener(v -> showWallpaperPicker());
+        appOrderChoice = findViewById(R.id.appOrderChoice);
+        appOrderChoice.setOnClickListener(v -> showAppOrderPicker());
         animationsChoice = findViewById(R.id.animationsChoice);
         animationsChoice.setOnClickListener(v -> {
             animations = !animations;
@@ -158,6 +161,32 @@ public final class LauncherSettingsActivity extends Activity {
                 .show();
     }
 
+    /** Labels of AppOrder.MODES, in the same order. */
+    private String[] appOrderLabels() {
+        return new String[]{getString(R.string.app_order_custom), getString(R.string.app_order_az),
+                getString(R.string.app_order_newest)};
+    }
+
+    private int appOrderIndex() {
+        return java.util.Arrays.asList(AppOrder.MODES).indexOf(
+                AppOrder.parse(choices.getString(AppOrder.KEY, null)));
+    }
+
+    /** Not a theme choice (Follow theme leaves it alone): it only decides how the owner's apps are sorted. */
+    private void showAppOrderPicker() {
+        new AlertDialog.Builder(this)
+                .setTitle(appOrderChoice.getText())   // "App order: Custom", the row itself
+                .setSingleChoiceItems(appOrderLabels(), appOrderIndex(), (dialog, which) -> {
+                    dialog.dismiss();
+                    if (which == appOrderIndex()) return;
+                    choices.edit().putString(AppOrder.KEY, AppOrder.MODES[which]).apply();
+                    setResult(RESULT_OK);
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     private static int indexOf(List<File> images, String name) {
         if (name == null) return -1;
         for (int i = 0; i < images.size(); i++) {
@@ -191,6 +220,7 @@ public final class LauncherSettingsActivity extends Activity {
                 "none".equals(wallpaperCurrent) ? getString(R.string.wallpaper_none)
                         : wallpaperCurrent != null ? wallpaperCurrent
                         : getString(R.string.wallpaper_theme_default)));
+        appOrderChoice.setText(getString(R.string.app_order_state, appOrderLabels()[appOrderIndex()]));
         followThemeChoice.setSelected(!hasOnTvChoices());
     }
 

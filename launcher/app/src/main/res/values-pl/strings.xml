@@ -85,4 +85,12 @@
         <item quantity="other">%1$d aplikacji</item>
     </plurals>
     <string name="greeting_with_name">%1$s, %2$s</string>
+    <string name="dock_pin">Przypnij do docka</string>
+    <string name="dock_remove">Usuń z docka</string>
+    <string name="tile_move">Przenieś</string>
+    <string name="tile_app_info">Informacje o aplikacji</string>
+    <string name="app_order_state">Kolejność aplikacji: %1$s</string>
+    <string name="app_order_custom">Własna</string>
+    <string name="app_order_az">Alfabetycznie</string>
+    <string name="app_order_newest">Najnowsze instalacje najpierw</string>
 </resources>

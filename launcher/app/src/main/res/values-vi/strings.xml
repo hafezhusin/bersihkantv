@@ -68,4 +68,12 @@
     <string name="dock_edit">Chỉnh sửa dock</string>
     <string name="dock_edit_hint">Chọn vị trí trên dock cần đổi rồi nhấn OK. Nhấn Quay lại để kết thúc.</string>
     <string name="dock_edit_pick_app">Giờ chọn ứng dụng để đặt vào đó rồi nhấn OK. Nhấn Quay lại để chọn vị trí khác.</string>
+    <string name="dock_pin">Ghim vào dock</string>
+    <string name="dock_remove">Gỡ khỏi dock</string>
+    <string name="tile_move">Di chuyển</string>
+    <string name="tile_app_info">Thông tin ứng dụng</string>
+    <string name="app_order_state">Thứ tự ứng dụng: %1$s</string>
+    <string name="app_order_custom">Tùy chỉnh</string>
+    <string name="app_order_az">Theo bảng chữ cái</string>
+    <string name="app_order_newest">Cài đặt mới nhất trước</string>
 </resources>

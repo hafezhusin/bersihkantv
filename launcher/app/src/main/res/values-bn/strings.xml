@@ -88,4 +88,12 @@
         <item quantity="other">%1$dটি অ্যাপ</item>
     </plurals>
     <string name="greeting_with_name">%1$s, %2$s</string>
+    <string name="dock_pin">ডকে পিন করুন</string>
+    <string name="dock_remove">ডক থেকে সরান</string>
+    <string name="tile_move">সরান</string>
+    <string name="tile_app_info">অ্যাপের তথ্য</string>
+    <string name="app_order_state">অ্যাপের ক্রম: %1$s</string>
+    <string name="app_order_custom">কাস্টম</string>
+    <string name="app_order_az">বর্ণানুক্রমে</string>
+    <string name="app_order_newest">সবচেয়ে নতুন ইনস্টল আগে</string>
 </resources>

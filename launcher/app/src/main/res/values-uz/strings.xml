@@ -100,4 +100,12 @@
     <string name="race_live">%1$s · jonli</string>
     <string name="race_finished">Marra</string>
     <string name="last_opened">Oxirgi marta ochilgan: %1$s</string>
+    <string name="dock_pin">Dockka mahkamlash</string>
+    <string name="dock_remove">Dockdan olib tashlash</string>
+    <string name="tile_move">Koʻchirish</string>
+    <string name="tile_app_info">Ilova haqida</string>
+    <string name="app_order_state">Ilovalar tartibi: %1$s</string>
+    <string name="app_order_custom">Maxsus</string>
+    <string name="app_order_az">Alifbo boʻyicha</string>
+    <string name="app_order_newest">Eng yangi oʻrnatilganlar avval</string>
 </resources>

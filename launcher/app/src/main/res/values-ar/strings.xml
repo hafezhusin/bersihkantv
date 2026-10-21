@@ -87,4 +87,12 @@
         <item quantity="other">%1$d تطبيق</item>
     </plurals>
     <string name="greeting_with_name">%1$s، %2$s</string>
+    <string name="dock_pin">تثبيت في شريط التطبيقات</string>
+    <string name="dock_remove">إزالة من شريط التطبيقات</string>
+    <string name="tile_move">نقل</string>
+    <string name="tile_app_info">معلومات التطبيق</string>
+    <string name="app_order_state">ترتيب التطبيقات: %1$s</string>
+    <string name="app_order_custom">مخصص</string>
+    <string name="app_order_az">أبجدي</string>
+    <string name="app_order_newest">الأحدث تثبيتًا أولًا</string>
 </resources>

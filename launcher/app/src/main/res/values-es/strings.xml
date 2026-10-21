@@ -100,4 +100,12 @@
     <string name="race_live">%1$s · en directo</string>
     <string name="race_finished">Bandera a cuadros</string>
     <string name="last_opened">Abierta por última vez %1$s</string>
+    <string name="dock_pin">Fijar en el dock</string>
+    <string name="dock_remove">Quitar del dock</string>
+    <string name="tile_move">Mover</string>
+    <string name="tile_app_info">Información de la app</string>
+    <string name="app_order_state">Orden de las apps: %1$s</string>
+    <string name="app_order_custom">Personalizado</string>
+    <string name="app_order_az">Alfabético</string>
+    <string name="app_order_newest">Las instaladas más recientemente primero</string>
 </resources>

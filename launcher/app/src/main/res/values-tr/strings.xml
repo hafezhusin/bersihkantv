@@ -83,4 +83,12 @@
         <item quantity="other">%1$d uygulama</item>
     </plurals>
     <string name="greeting_with_name">%1$s, %2$s</string>
+    <string name="dock_pin">Dock\'a sabitle</string>
+    <string name="dock_remove">Dock\'tan kaldır</string>
+    <string name="tile_move">Taşı</string>
+    <string name="tile_app_info">Uygulama bilgileri</string>
+    <string name="app_order_state">Uygulama sırası: %1$s</string>
+    <string name="app_order_custom">Özel</string>
+    <string name="app_order_az">Alfabetik</string>
+    <string name="app_order_newest">En son yüklenenler önce</string>
 </resources>

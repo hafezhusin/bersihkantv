@@ -57,4 +57,12 @@
         <item quantity="other">%1$d แอป</item>
     </plurals>
     <string name="greeting_with_name">%1$s %2$s</string>
+    <string name="dock_pin">ปักหมุดในแถบแอป</string>
+    <string name="dock_remove">นำออกจากแถบแอป</string>
+    <string name="tile_move">ย้าย</string>
+    <string name="tile_app_info">ข้อมูลแอป</string>
+    <string name="app_order_state">ลำดับแอป: %1$s</string>
+    <string name="app_order_custom">กำหนดเอง</string>
+    <string name="app_order_az">ตามตัวอักษร</string>
+    <string name="app_order_newest">ติดตั้งล่าสุดก่อน</string>
 </resources>

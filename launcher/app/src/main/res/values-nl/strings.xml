@@ -101,4 +101,12 @@
     <string name="race_live">%1$s · live</string>
     <string name="race_finished">Geblokte vlag</string>
     <string name="last_opened">Laatst geopend %1$s</string>
+    <string name="dock_pin">Vastzetten in dock</string>
+    <string name="dock_remove">Uit dock halen</string>
+    <string name="tile_move">Verplaatsen</string>
+    <string name="tile_app_info">App-info</string>
+    <string name="app_order_state">App-volgorde: %1$s</string>
+    <string name="app_order_custom">Aangepast</string>
+    <string name="app_order_az">Alfabetisch</string>
+    <string name="app_order_newest">Laatst geïnstalleerd eerst</string>
 </resources>

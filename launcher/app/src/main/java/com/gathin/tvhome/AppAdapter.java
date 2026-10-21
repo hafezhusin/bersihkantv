@@ -54,6 +54,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         /** Called for a D-pad direction key on a tile. Return true when handled (focus stays put). */
         boolean onTileVerticalKey(int position, int keyCode);
 
+        /** Hold OK on an app tile with tile_menu on: the tile menu (pin to or remove from the dock, move, app info). */
+        void onTileMenu(int position, View card);
+
         void onLibraryRequested();
         void onLibraryFocused();
         void onLibraryUp();
@@ -182,6 +185,8 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final List<String> favourites;
     /** Grid apps fill the dock slots dock_apps leaves free (config.xml, fill_dock). */
     private final boolean fillDock;
+    /** tile_menu: hold OK opens the tile menu instead of App info. */
+    private final boolean tileMenu;
     /** Dock apps found at the last reload, and the empty slots after them. */
     private int docked, emptySlots;
     /** Never shown as tiles (res/values/config.xml, hidden_apps). */
@@ -206,6 +211,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.dockSize = dockSize;
         this.favourites = cfg.dockApps;
         this.fillDock = cfg.fillDock;
+        this.tileMenu = cfg.tileMenu;
         this.hidden = new HashSet<>(cfg.hiddenApps);
         this.animations = cfg.animations;
         this.advancedEffects = cfg.animations && cfg.advancedEffects;
@@ -292,6 +298,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (ca != cb) return ca ? -1 : 1;
             return a.label.compareToIgnoreCase(b.label);
         });
+        sortBelowDock(fresh, pm);
         // Retain the optional Default-home tile until dependent tile-ordering work is merged.
         if (showHomeSettings
                 && pm.resolveActivity(new Intent(Settings.ACTION_HOME_SETTINGS), 0) != null) {
@@ -309,6 +316,46 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         items.clear();
         items.addAll(fresh);
         notifyDataSetChanged();
+    }
+
+    /** Launcher settings, App order (AppOrder): custom, az or newest. */
+    String appOrder() {
+        return AppOrder.parse(ctx.getSharedPreferences(Config.SETTINGS_NAME, Context.MODE_PRIVATE)
+                .getString(AppOrder.KEY, null));
+    }
+
+    /**
+     * App order az or newest: re-sorts the tiles after the dock. The dock is the first row, or with fill_dock off
+     * only the pinned apps at its start (the rest of that row are tiles of the grid, shown after the empty slots).
+     */
+    private void sortBelowDock(List<Entry> fresh, PackageManager pm) {
+        String mode = appOrder();
+        if (AppOrder.CUSTOM.equals(mode)) return;
+        int dock = Math.min(dockSize, fresh.size());
+        if (dockRow && !fillDock) {
+            int pinned = 0;
+            while (pinned < dock && favourites.contains(fresh.get(pinned).pkg)) pinned++;
+            dock = pinned;
+        }
+        java.util.Comparator<Entry> byName = (a, b) -> a.label.compareToIgnoreCase(b.label);
+        if (AppOrder.AZ.equals(mode)) {
+            AppOrder.sortFrom(fresh, dock, byName);
+            return;
+        }
+        Map<String, Long> installed = new HashMap<>();
+        for (int i = dock; i < fresh.size(); i++) {
+            String pkg = fresh.get(i).pkg;
+            long when = 0;
+            try {
+                when = pm.getPackageInfo(pkg, 0).firstInstallTime;
+            } catch (PackageManager.NameNotFoundException ignored) {
+            }
+            installed.put(pkg, when);
+        }
+        AppOrder.sortFrom(fresh, dock, (a, b) -> {
+            int newer = Long.compare(installed.get(b.pkg), installed.get(a.pkg));
+            return newer != 0 ? newer : byName.compare(a, b);
+        });
     }
 
     /** A banner_* drawable bundled with the launcher, or null for none or a name that is not one. */
@@ -437,14 +484,21 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {
-            Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + e.pkg));
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            try {
-                ctx.startActivity(i);
-            } catch (ActivityNotFoundException ignored) {
-            }
+            int at = h.getBindingAdapterPosition();
+            if (!tileMenu || e.kind == Entry.HOME_SETTINGS || at == RecyclerView.NO_POSITION) openAppInfo(ctx, e.pkg);
+            else listener.onTileMenu(at, v);
             return true;
         });
+    }
+
+    /** The system's App info page for a package (force stop, disable, storage). */
+    static void openAppInfo(Context ctx, String pkg) {
+        Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + pkg));
+        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try {
+            ctx.startActivity(i);
+        } catch (ActivityNotFoundException ignored) {
+        }
     }
 
     /** Opens the tile's activity by explicit component, with no extras: a card can name nothing else. */

@@ -89,4 +89,12 @@
         <item quantity="other">%1$d aplikací</item>
     </plurals>
     <string name="greeting_with_name">%1$s, %2$s</string>
+    <string name="dock_pin">Připnout do doku</string>
+    <string name="dock_remove">Odebrat z doku</string>
+    <string name="tile_move">Přesunout</string>
+    <string name="tile_app_info">Informace o aplikaci</string>
+    <string name="app_order_state">Pořadí aplikací: %1$s</string>
+    <string name="app_order_custom">Vlastní</string>
+    <string name="app_order_az">Abecedně</string>
+    <string name="app_order_newest">Naposledy nainstalované první</string>
 </resources>

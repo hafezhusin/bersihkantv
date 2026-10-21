@@ -88,4 +88,12 @@
     <string name="dock_edit">Muokkaa telakkaa</string>
     <string name="dock_edit_hint">Valitse muutettava telakan paikka ja paina OK. Takaisin lopettaa.</string>
     <string name="dock_edit_pick_app">Valitse nyt sinne tuleva sovellus ja paina OK. Takaisin valitsee toisen paikan.</string>
+    <string name="dock_pin">Kiinnitä telakkaan</string>
+    <string name="dock_remove">Poista telakasta</string>
+    <string name="tile_move">Siirrä</string>
+    <string name="tile_app_info">Sovelluksen tiedot</string>
+    <string name="app_order_state">Sovellusten järjestys: %1$s</string>
+    <string name="app_order_custom">Oma</string>
+    <string name="app_order_az">Aakkosjärjestys</string>
+    <string name="app_order_newest">Viimeksi asennetut ensin</string>
 </resources>

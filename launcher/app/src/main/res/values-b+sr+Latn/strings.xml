@@ -65,4 +65,12 @@
         <item quantity="other">%1$d aplikacija</item>
     </plurals>
     <string name="greeting_with_name">%1$s, %2$s</string>
+    <string name="dock_pin">Zakači na dok</string>
+    <string name="dock_remove">Ukloni sa doka</string>
+    <string name="tile_move">Pomeri</string>
+    <string name="tile_app_info">Informacije o aplikaciji</string>
+    <string name="app_order_state">Redosled aplikacija: %1$s</string>
+    <string name="app_order_custom">Prilagođeno</string>
+    <string name="app_order_az">Abecedno</string>
+    <string name="app_order_newest">Najnovije instalirane prve</string>
 </resources>
