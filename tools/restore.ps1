@@ -24,3 +24,4 @@ $env:TV_HOST = $TvHost
 $cmds = & $py -I (Join-Path $repo 'tools\recovery.py') --commands $List $Stock
 if ($LASTEXITCODE -ne 0) { throw 'no restore plan was built, the TV was not changed' }
 $cmds | & $py -I (Join-Path $repo 'tools\tv.py') --batch
+if ($LASTEXITCODE -ne 0) { throw "tv.py --batch failed (exit code $LASTEXITCODE): the restore may be only partly applied; run it again once the TV answers" }
