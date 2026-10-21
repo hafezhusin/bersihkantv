@@ -436,7 +436,7 @@ final class Config {
         return json;
     }
 
-    private static JSONObject read(File file) {
+    static JSONObject read(File file) {
         if (file == null || !file.isFile()) return null;
         if (file.length() > 64 * 1024) {
             Log.w(TAG, "ignoring " + file + ": larger than 64 KB");
