@@ -167,7 +167,10 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   while the HOME key lands on `setupwraith/.RecoveryActivity` anyway. `cmd package resolve-activity`
   and `query-activities` answer with the resolver table's winner, which is not necessarily the
   activity that takes focus: `dumpsys activity activities | grep mFocusedApp` is the ground truth,
-  and it is what to check before saying the takeover worked.
+  and it is what to check before saying the takeover worked. Where setupwraith has to stay (casting,
+  below), set `take_over_home` in `config.xml` instead: the stock launcher stays enabled, so
+  `RecoveryActivity` never gets Home, and `HomeKeyService` opens this launcher for the Home button and
+  whenever Android shows the stock home screen, while this launcher holds the HOME role.
 - **The TV drops off Wi-Fi for good the moment setupwraith is disabled**, seen on Google TV 14 (Sony
   BRAVIA 9 II, Philips R8G, Skyworth SWTV-24NA-4K NF, Xiaomi TV Box S 3rd gen MiTV-AFMU0) and on a TCL
   G07 on Google TV 11 (build AR17; on AR20 the network belonged to `android.uid.system`). A Wi-Fi
@@ -195,7 +198,13 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   the credentials in memory, so casting survives until the next reboot - and only in that process.
   `am force-stop com.google.android.apps.mediashell` followed by the receiver coming back prints
   `Retry loading factory credentials` and `No private key, hence empty signature` again, so anything
-  that restarts it (a crash, a force-stop, an update) needs the same sequence. Reported on Google's
+  that restarts it (a crash, a force-stop, an update) needs the same sequence. A third way keeps
+  casting and the new Home without that sequence: keep setupwraith and the stock launcher enabled and
+  set `take_over_home` in `config.xml` (tested on a Chromecast with Google TV 4K, UTTC.250917.004). On a
+  TV that was cleaned up before, `build-and-install.sh` enables the stock launcher first and setupwraith
+  after it. Don't stop halfway: setupwraith enabled with the stock launcher disabled is the crash loop
+  below, at the next restart if not sooner. `tools/restore.sh <list> <stock launcher>` hands the HOME
+  role back, which ends the takeover; `HomeKeyService` stays enabled but does nothing without the role. Reported on Google's
   own Chromecast hardware (`boreal`) and, with the same log lines, on a Google TV Streamer
   (`kirkwood`, `UTTK.260317.003`), where the `CastInfoProvider` also lives inside the setupwraith
   APK; the Xiaomi Mi Box S 2nd gen list says casting from a Pixel still works there with
@@ -292,6 +301,7 @@ tools/tv.py 'dumpsys accessibility'
 | Helper | Component in the enabled-services list | Key it filters |
 | --- | --- | --- |
 | Home button | `com.gathin.tvhome/.HomeKeyService` | `KEYCODE_ALL_APPS` (not an ordinary `KEYCODE_HOME`) |
+| Home takeover (`take_over_home`) | `com.gathin.tvhome/.HomeKeyService` | `KEYCODE_HOME`, while this launcher holds the HOME role and Android dispatches Home to the stock launcher |
 | Input button | `com.gathin.tvhome/.InputKeyService` | `KEYCODE_TV`, `KEYCODE_TV_INPUT`, plus the keycodes in `input_key_keycodes` and `app_keys` (`config.xml` or a theme) |
 
 - **Enabled** means the component is in that user's colon-separated list (the class may be written in

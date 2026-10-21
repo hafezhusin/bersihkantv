@@ -459,6 +459,10 @@ tools/tv.py 'settings put secure screensaver_components com.gathin.tvhome/.Clock
   **gear** button, even one Android does not map (scancodes or keycodes in config.xml).
 - With `settings_key_panel` the gear opens a [small quick settings panel](docs/quick-settings-panel.jpg)
   over Home or any app: TV settings, Display, Network, Apps and Launcher settings.
+- On Google TV builds that have to keep setupwraith for casting (tested on a Chromecast with Google TV;
+  the Google TV Streamer is the same case), `take_over_home` in config.xml keeps the stock launcher and
+  has the same service open this launcher for the **Home** button and whenever the stock home screen
+  appears.
 
 </details>
 
