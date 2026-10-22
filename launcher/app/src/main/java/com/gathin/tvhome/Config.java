@@ -69,6 +69,9 @@ final class Config {
     final boolean advancedEffects;
     final int rowsBelowDock;
     final boolean shamsiDate;
+    /** Lunisolar date under the date (config.json lunar_date), computed for lunarUtcOffset hours east of UTC (-1: by locale). */
+    final boolean lunarDate;
+    final int lunarUtcOffset;
     /** Name after the greeting ("Good morning, Mr. Trịnh"); empty for the greeting alone. */
     final String greetingName;
     final boolean moduleCards;
@@ -173,7 +176,7 @@ final class Config {
                    Festival festival, int[] inputKeycodes, List<String> appKeys, String stockHomeRedirect,
                    List<RaceWeekend.Race> raceCalendar, boolean cinematicHome, boolean ambientGlow, boolean appGlow, int homeIdleClockMinutes,
                    boolean keyFilter, boolean dockGlass, String glowStyle, boolean wallpaperCaptions,
-                   boolean handleViewInputs) {
+                   boolean handleViewInputs, boolean lunarDate, int lunarUtcOffset) {
         this.handleViewInputs = handleViewInputs;
         this.inputKeycodes = inputKeycodes;
         this.appKeys = Collections.unmodifiableList(appKeys);
@@ -199,6 +202,8 @@ final class Config {
         this.animations = animations;
         this.advancedEffects = advancedEffects;
         this.shamsiDate = shamsiDate;
+        this.lunarDate = lunarDate;
+        this.lunarUtcOffset = lunarUtcOffset;
         this.greetingName = greetingName;
         this.moduleCards = moduleCards;
         this.reducedMotion = reducedMotion;
@@ -273,6 +278,8 @@ final class Config {
         boolean animations = res.getBoolean(R.bool.animations);
         boolean advancedEffects = res.getBoolean(R.bool.advanced_effects);
         boolean shamsi = res.getBoolean(R.bool.shamsi_date);
+        boolean lunar = res.getBoolean(R.bool.lunar_date);
+        int lunarOffset = -1;
         String greetingName = res.getString(R.string.greeting_name).trim();
         boolean moduleCards = res.getBoolean(R.bool.module_cards);
         boolean reducedMotion = res.getBoolean(R.bool.reduced_motion);
@@ -336,6 +343,8 @@ final class Config {
             animations = bool(json, "animations", animations);
             advancedEffects = bool(json, "advanced_effects", advancedEffects);
             shamsi = bool(json, "shamsi_date", shamsi);
+            lunar = bool(json, "lunar_date", lunar);
+            lunarOffset = integer(json, "lunar_utc_offset", lunarOffset, -1, 14);
             greetingName = string(json, "greeting_name", greetingName).trim();
             moduleCards = bool(json, "module_cards", moduleCards);
             reducedMotion = bool(json, "reduced_motion", reducedMotion);
@@ -431,7 +440,7 @@ final class Config {
                 Math.max(0, Math.min(100, skyIntensity)), settingsKeycodes, settingsKeyPanel, wallpaperEnabled, wallpaper,
                 wallpapers, rotationMinutes, wallpaperDim, dockOpacity, wallpaperOrder, applied,
                 festival, inputKeycodes, appKeys, stockHomeRedirect, json == null ? Collections.emptyList() : raceCalendar(json), cinematic, ambientGlow, appGlow,
-                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs);
+                Math.max(0, idleClockMinutes), keyFilter, dockGlass, glowStyle, wallpaperCaptions, handleViewInputs, lunar, lunarOffset);
     }
 
     /**

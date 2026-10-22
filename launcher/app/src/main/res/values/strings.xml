@@ -23,6 +23,18 @@
     <string name="date_format">EEEE  d MMMM</string>
     <!-- Date next to the clock on Home; a locale can split it over two lines with \n. -->
     <string name="date_format_home" translatable="false">@string/date_format</string>
+    <!-- Lunar date under the date: day, month, year name. -->
+    <string name="lunar_date_format">Lunar %1$d/%2$s · %3$s</string>
+    <string name="lunar_month_leap">%1$d (leap)</string>
+    <string name="lunar_year">Year of the %2$s</string>
+    <string-array name="lunar_stems">
+        <item>Jia</item><item>Yi</item><item>Bing</item><item>Ding</item><item>Wu</item>
+        <item>Ji</item><item>Geng</item><item>Xin</item><item>Ren</item><item>Gui</item>
+    </string-array>
+    <string-array name="lunar_branches">
+        <item>Rat</item><item>Ox</item><item>Tiger</item><item>Rabbit</item><item>Dragon</item><item>Snake</item>
+        <item>Horse</item><item>Goat</item><item>Monkey</item><item>Rooster</item><item>Dog</item><item>Pig</item>
+    </string-array>
     <string name="shamsi_month_farvardin">Farvardin</string>
     <string name="shamsi_month_ordibehesht">Ordibehesht</string>
     <string name="shamsi_month_khordad">Khordad</string>
