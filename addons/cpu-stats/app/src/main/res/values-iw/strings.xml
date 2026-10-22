@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">נתוני מעבד</string>
+    <string name="loading">קורא נתונים…</string>
+    <string name="unavailable">הנתונים אינם זמינים</string>
+    <string name="back">חזרה</string>
+    <string name="enable">גישה למעבד דרך Shizuku: %1$s</string>
+    <string name="on">פעיל</string>
+    <string name="off">כבוי</string>
+    <string name="authorize">אישור גישה למעבד</string>
+    <string name="setup">מדריך הגדרת Shizuku</string>
+    <string name="help">אפשר להתקין את Shizuku, להפעיל אותה ואז לאפשר ולאשר גישה למעבד. ללא הרשאות רוט, יש להפעיל מחדש את Shizuku אחרי כל אתחול של הטלוויזיה.</string>
+    <string name="absent">Shizuku אינה מותקנת. אפשרויות המעבד מוסתרות.</string>
+    <string name="cpu">שימוש במעבד: %1$d%%</string>
+</resources>

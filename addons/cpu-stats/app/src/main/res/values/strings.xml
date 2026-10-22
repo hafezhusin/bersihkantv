@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">CPU Stats</string>
+    <string name="loading">Reading counters…</string>
+    <string name="unavailable">Readings unavailable</string>
+    <string name="back">Back</string>
+    <string name="enable">CPU access through Shizuku: %1$s</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="authorize">Authorize CPU access</string>
+    <string name="setup">Shizuku setup guide</string>
+    <string name="help">Optional: install Shizuku yourself, start it, then enable and authorize CPU access. On an unrooted TV, start Shizuku again after each reboot.</string>
+    <string name="absent">Shizuku is not installed. CPU controls are hidden.</string>
+    <string name="cpu">System CPU: %1$d%%</string>
+</resources>

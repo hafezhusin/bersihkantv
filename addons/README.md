@@ -10,8 +10,7 @@ the core bigger or change how it behaves. You install an add-on only if you want
 | Add-on | What it does | Author | Tested on | Permissions |
 |---|---|---|---|---|
 
-None yet. A widget, an info tile, a storage or smart-home card: if it can live as its own small app,
-it can live here. See the rules below.
+| [CPU Stats](cpu-stats/) | Opt-in Shizuku system CPU screen | [lionlev21](https://github.com/lionlev21) | Android TV 12 (model private) | Shizuku, opt-in |
 
 ## How an add-on works
 
