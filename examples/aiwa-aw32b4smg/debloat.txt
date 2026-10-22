@@ -1,0 +1,83 @@
+# AIWA AW32B4SMG, 32-inch (Changhong, board JUC7.820.0029.7270, device redwood, product ISDB92AW), Colombia
+# Android TV 14 (API 34), firmware UKNV.260504.001. About 935 MB RAM (MemTotal 935352 kB).
+# Same redwood board and firmware as examples/rca-ai-pont; ro.product.model reads "AI PONT SA".
+#
+# Apply:   TV_HOST=<tv ip> tools/disable.sh examples/aiwa-aw32b4smg/debloat.txt
+# Dock:    TV_HOST=<tv ip> tools/theme.sh examples/aiwa-aw32b4smg
+#          config.json mirrors the config.xml the test set was built with (dock YouTube, Prime Video,
+#          Play Store; Settings and Live TVx hidden). It was applied by rebuilding, not with theme.sh.
+# Undo:    TV_HOST=<tv ip> tools/restore.sh examples/aiwa-aw32b4smg/debloat.txt com.google.android.tvlauncher
+# Everything is DISABLED, not uninstalled. Comment out any line you want to keep.
+#
+# Stock launcher: com.google.android.tvlauncher (Android TV, not launcherx)
+# Live TV / tuner: com.mediatek.wwtv.tvcenter (left enabled; the Inputs menu uses it)
+#
+# Tested the same day on one set, applied in three batches with a screenshot after each,
+# then one reboot. Not a multi-day soak. Owner uses only streaming apps (no antenna or cable).
+#
+# Checked on the new home, by screenshot and by the window in front:
+# - launcher/build-and-install.sh with INPUT_KEY_SERVICE=1 set com.gathin.tvhome as Home;
+#   mFocusedApp is com.gathin.tvhome/.MainActivity.
+# - YouTube opens and loads its start screen with AdGuard Private DNS on.
+# - Waking from standby with the remote lands on the new home.
+# - Private DNS dns.adguard-dns.com validates on Wi-Fi; doubleclick.net resolves to 127.0.0.1.
+#
+# Known quirks on this firmware:
+# - USB debugging opens network ADB on port 5555, and Wireless debugging is offered as well
+#   (a random port such as 37683). The stock adb binary answered "No route to host" on the
+#   wireless port; port 5555 worked.
+# - com.cltv.fast ("Live TVx", FAST channels) is re-enabled by the firmware at every boot.
+#   Hide it in the launcher with hidden_apps (config.json below does) instead of disabling it after each boot.
+# - After a full reboot the TV came up in com.mediatek.wwtv.tvcenter instead of Home. Settings has
+#   no "Power on behavior" entry (checked Device Preferences > Power, Power & energy, Inputs).
+#   Waking from standby goes to Home; press Home after a cold boot.
+# - The saved Wi-Fi network belongs to com.google.uid.shared (uid 10044, Play services), so
+#   setupwraith is left alone; disable.sh would skip it anyway if it owned the network.
+# - Play Movies & TV shows as a tile in the stock launcher but is not an installed package
+#   (com.google.android.videos is absent); it disappears once launcher/ replaces Home.
+
+# Homwee store, ads and silent installers
+com.homwee.aipont                       # brand portal
+com.homwee.store
+com.homwee.help                         # e-manual
+com.homwee.chinstallapk                 # silent installer; Play Store and sideloading still work
+android.autoinstalls.config.homwee
+com.homwee.chtvmanager                  # "TV Manager"
+
+# Content recognition and FAST channels
+tv.anoki.acr.anokiacroptin              # automatic content recognition
+com.cltv.fast                           # FAST channels; comes back at every boot (see above)
+
+# Google promo rows, feedback and extras
+com.google.android.tvrecommendations
+com.google.android.feedback
+com.android.tv.feedbackconsent
+com.google.android.partnersetup
+com.google.android.tts
+com.google.android.marvin.talkback      # re-enable for TalkBack
+com.google.android.backdrop             # ambient screensaver
+com.google.android.syncadapters.calendar
+com.google.android.tv.remote.service    # Android phone remote
+
+# USB media viewers. Re-enable to browse a USB drive or view photos from it.
+com.homwee.mmp.fileexplorer             # "Media Player"
+com.homwee.mmp.imageplayer
+
+# Casting, voice and screen mirroring. Disabled on the test set at the owner's request.
+com.google.android.apps.mediashell      # Chromecast; re-enable to cast
+com.google.android.katniss              # re-enable for the microphone button
+com.homwee.multiscreenshare             # "Midiacast" screen mirroring app
+com.homwee.mmp.screenshare              # mirroring service behind it
+
+# Preloaded apps the owner does not use. Comment out what you watch.
+com.netflix.ninja
+com.google.android.youtube.tvmusic
+com.google.android.play.games
+
+# Stock launcher, replaced by launcher/. Left to launcher/build-and-install.sh, which disables it only
+# after the new home is installed and set as default; restore.sh re-enables it.
+# com.google.android.tvlauncher
+
+# Left enabled on purpose: firmware updates (com.homwee.upgrade, com.homwee.dmt.upgrade),
+# com.homwee.factory, com.homwee.synckey, com.mediatek.wwtv.setupwizard, Play Store,
+# Play services and the package installer.
