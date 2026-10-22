@@ -5,6 +5,10 @@ launcher/.gradle/
 launcher/build/
 launcher/app/build/
 launcher/local.properties
+# Release signing stays on the maintainer's machine; the example file is the only one committed.
+launcher/keystore.properties
+*.jks
+*.keystore
 # your own TV's dumps (serial, android_id, device names) stay local
 backup/
 # session screenshots and working notes (may show the Wi-Fi name or account avatar) stay local

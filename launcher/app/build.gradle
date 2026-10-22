@@ -2,6 +2,26 @@ plugins {
     id 'com.android.application'
 }
 
+// Release signing is opt-in: without launcher/keystore.properties a local build keeps the debug key,
+// so the default build-and-install flow is unchanged. A published artifact must be release-signed;
+// `-PrequireReleaseSigning=true` turns the missing key into a build error instead of a debug APK.
+// See docs/specs/release-artifact.md. The properties file and the keystore are never committed.
+def keystoreProperties = new Properties()
+def keystoreFile = rootProject.file('keystore.properties')
+if (keystoreFile.exists()) {
+    keystoreFile.withInputStream { keystoreProperties.load(it) }
+}
+def hasReleaseKey = keystoreFile.exists()
+// Checked before the release task runs, not while the script is evaluated: failing here keeps the
+// message the person sees the actual problem instead of AGP's secondary "compileSdkVersion" error.
+gradle.taskGraph.whenReady { graph ->
+    if (!hasReleaseKey && providers.gradleProperty('requireReleaseSigning')
+            .getOrElse('false').toBoolean() && graph.allTasks.any { it.name == 'assembleRelease' }) {
+        throw new GradleException('requireReleaseSigning=true needs launcher/keystore.properties with ' +
+                'storeFile, storePassword, keyAlias and keyPassword')
+    }
+}
+
 android {
     namespace 'com.gathin.tvhome'
     compileSdk 34
@@ -15,14 +35,27 @@ android {
         versionName '2.5'
     }
 
+    signingConfigs {
+        release {
+            if (hasReleaseKey) {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
             // R8 strips and optimises the code (AndroidX included): smaller APK, faster start on a slow TV CPU.
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            // Sideloaded over ADB, never published: sign with the debug key so it installs over a debug build.
-            signingConfig signingConfigs.debug
+            // Sideloaded over ADB from source: the debug key keeps installs simple. With
+            // keystore.properties present this becomes the release key, which is what a published
+            // artifact uses; tools/release_manifest.py refuses a debug-signed APK by default.
+            signingConfig hasReleaseKey ? signingConfigs.release : signingConfigs.debug
         }
     }
 

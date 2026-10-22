@@ -340,6 +340,7 @@ tools/theme.sh themes/aurora                                 # push a theme; --r
 | [`tools/check.py`](tools/check.py) | Compares the TV with the list that was applied, for what a firmware update undid; `--fix` puts it back. |
 | [`tools/privacy.py`](tools/privacy.py) | Audits the TV for voice, ACR and telemetry candidates and prints the evidence for each; `--write` turns the findings into a list `disable.sh` and `restore.sh` already understand. |
 | [`tools/theme.sh`](tools/theme.sh) | Push a folder from [`themes/`](themes/) to the launcher and restart Home. |
+| [`tools/release_manifest.py`](tools/release_manifest.py) | Creates `launcher-release.json` for a release APK and verifies a download against it before installing. |
 | [`tools/race_calendar.py`](tools/race_calendar.py) | Writes this season's F1 calendar into a theme for race-weekend mode, from the free Jolpica API. |
 | [`launcher/build-and-install.sh`](launcher/build-and-install.sh) | Builds a shrunk release (about 445 KB), installs it, switches Home, and rolls back if Home does not land on it. |
 
@@ -525,6 +526,22 @@ the tiles while Home is open. App banners load at xhdpi or better, so low-densit
 them before the focus zoom.
 
 </details>
+
+### Installing a published build
+
+A published release carries a release-signed APK and `launcher-release.json`. Before installing,
+verify the download against the manifest (this changes nothing on the TV):
+
+```bash
+tools/venv/bin/python tools/release_manifest.py verify \
+  --apk cleanyourtv-launcher-2.5.apk --manifest launcher-release.json
+```
+
+It checks the SHA-256 and size, package, version, SDK levels, ABIs and signer certificate, and says
+whether installing would be fresh, an upgrade, a no-op or a downgrade. A mismatch exits non-zero and
+nothing is installed. Building from source is unchanged and keeps the debug key unless you add
+`launcher/keystore.properties`; the manifest format, signing setup and rollback limits are in
+[`docs/specs/release-artifact.md`](docs/specs/release-artifact.md).
 
 ## Restoring your TV
 
