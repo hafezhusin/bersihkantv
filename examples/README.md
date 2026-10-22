@@ -238,6 +238,7 @@ Notes for models that have no tested list yet live in [`docs/devices/`](../docs/
 - [Samsung C71KW-200 / AT&T Osprey](../docs/devices/samsung-c71kw-200.md), Android TV 11, `RTT4.250301.001.release-r-sam-25Q3.2-refresh-cert-1`: in-place update to unmodified upstream launcher source, six-column theme, native reorder persistence, Home recovery and reboot checks; no tested debloat list.
 - [TCL `75QM751G`](../docs/devices/tcl-75qm751g-qm7.md) (QM7, 2024, `G08`, Android 14 `UTT2.250416.001 AU14`): the QM6K list applies with seven extra packages, setupwraith owns the saved Wi-Fi even on an Ethernet set, and the Cast receiver can be up while it has stopped advertising.
 - [TVision Hub](../docs/devices/tvision-hub.md) (SEI Robotics, Amlogic S905X2, T-Mobile's Google TV dongle): one-session report with seven disabled packages and the launcher confirmed as Home; ADB only connected after a restart; no several-day list.
+- [FFalcon 50F295C](../docs/devices/ffalcon-50f295c-ak30a5.md) (China firmware, `ak30a5`, Android 9 `20250630`): the install verifier that answers `verifier_verify_adb_installs` `null` and can be opened for one install, then restored; a preferred Home that the firmware's own boot activity ignores, and TCL's `APP_AUTO_START` appop silencing a boot receiver; two packages disabled in one evening, no several-day list.
 
 To add your TV, see [CONTRIBUTING.md](../CONTRIBUTING.md). The quickest way to get a list is to
 run the prompt in [PROMPT.md](../PROMPT.md) and copy the packages your assistant disabled.

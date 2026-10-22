@@ -146,6 +146,17 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
 - **Play Protect blocked the launcher** ("unsafe app blocked, built for an older version of Android")
   and `pm install` hung, then failed with `INSTALL_FAILED_VERIFICATION_FAILURE`, while it targeted
   SDK 29. It targets 34 now; if you built an old checkout, rebuild.
+- **`INSTALL_FAILED_VERIFICATION_FAILURE` naming `com.android.packageinstaller/.verifier.VerifierReciver`**
+  is the firmware's own install verifier, not Play Protect and not the API level. On a China-market
+  FFalcon `ak30a5` (20250630 build) the log added `fetch signature info from :com.tcl.cyberui` and
+  `The installing app not support tcl ui tab !`, and `settings get global verifier_verify_adb_installs`
+  answered `null`: writing `0` to that one global installed the same APK through plain `adb install`.
+  Put it back in the same session, on the failing path too — `settings delete global
+  verifier_verify_adb_installs` when it was `null`, the old value otherwise — because `0` accepts any
+  APK, and network ADB on 5555 is plaintext. `package_verifier_enable` and the installer package stay
+  as they were. Only when the message is `INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES ... signature
+  by tcl` is the set a dead end rather than a one-setting detour. Device note:
+  [FFalcon 50F295C](devices/ffalcon-50f295c-ak30a5.md).
 - **`pm install` fails with `INSTALL_FAILED_OLDER_SDK`** on a set older than the launcher: the APK's
   `minSdk` is a compile-time floor, so a TV on Android 7.0/7.1 (SDK 24/25) cannot take the published
   build at all ([#576](https://github.com/Gathin23/cleanyourtv/issues/576)). Read both numbers before

@@ -97,9 +97,18 @@ Launcher
 - Check that the TV accepts APKs before building anything. Some China-market sets answer every
   sideload with `INSTALL_FAILED_VERIFICATION_FAILURE` — `adb install`, `pm install`, a hand-started
   installer and even the manufacturer's own APKs all fail — and others refuse any package that
-  declares `android.intent.category.HOME` unless it carries the manufacturer's signature. If you
-  hit either, do the debloat half, say plainly that the launcher half is impossible here, and stop
-  retrying installs. The matching `examples/` header says which case your TV is.
+  declares `android.intent.category.HOME` unless it carries the manufacturer's signature. When the
+  message comes from the firmware's install verifier rather than from that signature rule (the other
+  one reads `INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES` and names the vendor's key), it is worth
+  one read before giving up: on an FFalcon `ak30a5` on 20250630 firmware,
+  `settings get global verifier_verify_adb_installs` answered `null`, and writing `0` to that one
+  setting installed the same APK through plain `adb install`. Read it before you write it, put it back
+  the same way whatever happens — `settings delete global verifier_verify_adb_installs` when it was
+  `null`, the old value otherwise, on the failing path too — and check the value back, because leaving
+  `0` accepts any APK, including one pushed over plaintext network ADB. If that one setting changes
+  nothing, do the debloat half, say plainly that the launcher half is impossible here, and stop
+  retrying installs. The matching `examples/` header says which case your TV is;
+  `docs/devices/` has the firmware-specific notes.
 - Check the TV's SDK level before promising the launcher, too: `tools/tv.py 'getprop
   ro.build.version.sdk'` against `grep minSdk launcher/app/build.gradle` (26 = Android 8.0). A set
   below it answers `INSTALL_FAILED_OLDER_SDK`; lowering `minSdk` is a source change you would then
@@ -116,7 +125,11 @@ Launcher
   commands can both name your launcher while Home still opens something else: on some Google TV builds
   `set-home-activity` prints `Success` and changes nothing, and setupwraith's `.RecoveryActivity`
   keeps the key. Confirm with `dumpsys activity activities | grep mFocusedApp` before telling me the
-  takeover worked.
+  takeover worked. Some firmware keeps its own boot target anyway: on a China-market TCL the preferred
+  Home stuck and the Home key opened the new launcher, but boot still started `com.tcl.cyberui`, and a
+  boot receiver of ours was silenced by TCL's `APP_AUTO_START` appop (`cmd appops get <pkg>
+  APP_AUTO_START`). Check both before saying the stock launcher is gone at boot, and remember a
+  `persist.*.boot*` property read back after a Home launch proves nothing.
 - Before disabling the stock launcher, check which other apps claim HOME: on Google TV the setup wizard
   (`com.google.android.tungsten.setupwraith`) takes over even after the stock launcher is disabled, and
   the matching `examples/` header says what to do. Before disabling setupwraith, run
