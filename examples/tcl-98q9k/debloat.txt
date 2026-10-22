@@ -1,0 +1,63 @@
+# TCL 98Q9K (China, 98-inch QD-Mini LED 2024), device tcl_mt5879_cn,
+# Android 11 (SDK 30), build RQ3A.210705.001 release-keys, ro.adb.secure=1, 32-bit only
+# (ro.product.cpu.abilist = armeabi-v7a,armeabi — no obstacle for the launcher, it is pure Java).
+# Same platform as examples/tcl-q10g-pro (tcl_mt5879_cn / MT9952 family). This file = that
+# list, minus com.tcl.bi which is not present on this unit. Applied with disable.sh and
+# re-checked after a full reboot: every entry stayed disabled, no crash-buffer entries.
+#
+# ADB: Settings (设置) -> 关于本机 -> 本机信息, press UP DOWN LEFT RIGHT on the remote
+# (repeat 2-3x), ADB toggle appears at the bottom. Persists across reboots, port 5555.
+#
+# Launcher: com.tcl.cyberui stays enabled as the fallback Home. The firmware's install gate
+# (OverseasAppConfig + InstallConfig strategies) was opened by writing the provider's config
+# rows through its debug shell command — see docs/devices/tcl-98q9k.md. com.gathin.tvhome is
+# installed, set as the default Home and reboot-verified.
+# Live TV: com.tcl.tv stays (owns DTV/HDMI playback and the remote's source key).
+#
+# Kept on purpose:
+#   com.tcl.guard                 电视卫士; the USB install path, keep it
+#   com.tcl.appmarket2            TCL app store, the other install channel
+#   com.sohu.inputmethod.sogou.tv the only input method; disable it and there is no keyboard
+#   com.tcl.ui_mediaCenter        USB playback
+#   com.tcl.settings, com.tcl.systemserver, com.tcl.ttvs   (same as the Q10G Pro list)
+#   com.tcl.MultiScreenInteraction_TV / com.tcl.miracast / com.kookong.tvplus   phone casting
+#   com.tcl.vod / com.tcl.tliveplay   register playback services the stock Live TV may use
+#
+# The unit also carries ordinary /data/app content preloads (CIBN, Migu Video, Mango TV,
+# Bilibili TV 云视听小电视, KTCP, blbl, Migu game hall, TCL browser, weather, album, video
+# call, WeChat TV). They are regular applications, not part of any system boot chain, so
+# disable the ones you don't use the same way — they are left out of this list because
+# which of them you want is a per-household choice.
+#
+# Apply:  TV_HOST=<tv ip> tools/disable.sh examples/tcl-98q9k/debloat.txt
+#         (Windows: powershell -ExecutionPolicy Bypass -File tools\disable.ps1 -TvHost <tv ip> examples\tcl-98q9k\debloat.txt)
+# Undo:   TV_HOST=<tv ip> tools/restore.sh examples/tcl-98q9k/debloat.txt com.tcl.cyberui
+#
+# ============================================================================
+
+# Ad and telemetry reporting (from the Q10G Pro list, verified on this platform)
+com.tcl.bootadservice                    # full-screen ad before Home (开机广告)
+com.tcl.profilemanager                   # audience / profile reporting
+com.tcl.xian.StartandroidService         # background reporting service
+com.tcl.logkit                           # log collection and upload
+com.tcl.recognize.service                # screen recognition; silent-install channel
+com.tcl.appreciate.art                   # art-wallpaper / screensaver promo content
+com.tcl.atomic.servicecenter             # home-screen recommendation cards (plugin host)
+com.tcl.c2dm.client                      # TCL push, long-lived connection
+com.tcl.wholenetsearch                   # whole-net search; results carry VOD promotions
+com.tcl.playskill                        # "tips" promo app
+com.tcl.repairguide                      # repair-guide app
+com.tcl.useragreement                    # user-agreement popup
+android.autoinstalls.config.tcl.device   # first-boot auto-install of preloaded apps
+
+# Content apps that carry their own promo surfaces (from the Q10G Pro list)
+com.tcl.ffeducation                      # kids / education content
+com.tcl.ffkaraoke                        # karaoke
+
+# OTA and account — re-enable com.tcl.versionUpdateApp when you want firmware updates
+com.tcl.versionUpdateApp                 # system OTA and app auto-update
+com.tcl.UpdatePeripheral                 # peripheral firmware OTA, ~210 MB resident, the top RSS here
+com.tcl.usercenter                       # account / wallet / VIP + XMPP; re-enable to sign in
+
+# Voice — the remote's voice key does nothing afterwards, re-enable com.tcl.walleve to bring it back
+com.tcl.walleve                          # iFlytek voice engine; registers an AccessibilityService
