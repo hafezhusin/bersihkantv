@@ -326,9 +326,18 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   `tools/tv.py 'pm enable --user 0 com.google.android.apps.tv.launcherx'`.
 - **`theme.sh` fails with "couldn't create file: Permission denied"**, seen on TCL G07 (Android 11): the
   shell is not in the group that may write `Android/data`. `theme.sh` stages the files in
-  `/data/local/tmp` and, when copying them in is refused, writes them through the launcher's
-  `ThemeProvider` instead. A launcher installed before that provider existed doesn't have it: run
+  `/data/local/tmp` and writes them through the launcher's `ThemeProvider`, which creates them as the
+  launcher; `cp` is only the fallback for a launcher installed before that provider existed: run
   `launcher/build-and-install.sh` once, then push the theme again.
+- **A theme push prints "is on the TV" and nothing changes**, seen on Android 14: the shell *can* write
+  `Android/data` there, so `cp` succeeded - but the file it created belonged to the shell (`ls -ln` shows
+  `2000 1078` instead of the launcher's uid) and the launcher logged `W TvHome.Config: ignoring
+  .../config.json: open failed: EACCES (Permission denied)`. Overwriting a file the launcher wrote itself
+  keeps its owner, so this only bit files that did not exist yet: it looked fine on a set that had been
+  themed before and did nothing on a fresh install or right after a reinstall. `theme.sh` now removes the
+  shell's copy and writes through the `ThemeProvider` first (the provider cannot truncate a file the shell
+  owns); on an older checkout, pushing the theme again after `launcher/build-and-install.sh` has written
+  the files once also fixes the ownership.
 - **Google TV comes back after a few remote presses**, seen on XGIMI (MoGo 3 Pro, Google TV 14). The
   remote's app buttons (YouTube, Netflix, Prime Video), the programmable button, the profile button and power
   all send F keys that the system hands to `com.xgimi.xrmservice/.XgimiGlobalKeyBroadcast` as global keys

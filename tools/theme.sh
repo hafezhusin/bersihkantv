@@ -36,11 +36,16 @@ RESTART="a=\$(settings get secure enabled_accessibility_services); am force-stop
 
 # Some firmware (TCL G07, Android 11) locks the shell out of Android/data. Files are staged in
 # /data/local/tmp and copied in, or written through the launcher's ThemeProvider when that is refused.
+# The provider has to be tried first: on Android 14 the shell can write into Android/data, so cp "succeeds",
+# but the file it creates belongs to the shell (uid 2000) and the launcher then gets EACCES opening it, which
+# silently ignores the theme whenever the file did not exist yet - a fresh install, or after a reinstall.
+# A provider write creates the file as the launcher, and it cannot truncate a file the shell owns either, so
+# remove our copy first. cp stays as the fallback for firmware without the provider.
 URI=content://$PKG.theme
 TMP=/data/local/tmp/cyt-theme
 # A file's staging path; wallpapers/a.jpg is staged as $TMP-wallpapers-a.jpg.
 stage() { echo "$TMP-${1//\//-}"; }
-put() { echo "cp $(stage "$1") $DIR/$1 2>/dev/null || content write --uri $URI/$1 < $(stage "$1"); rm -f $(stage "$1")"; }
+put() { echo "rm -f $DIR/$1 2>/dev/null; content write --uri $URI/$1 < $(stage "$1") 2>/dev/null || cp $(stage "$1") $DIR/$1 2>/dev/null; rm -f $(stage "$1")"; }
 del() { echo "rm -f $DIR/$1 2>/dev/null; content delete --uri $URI/$1 2>/dev/null"; }
 
 if [ "${1:-}" = --reset ]; then
