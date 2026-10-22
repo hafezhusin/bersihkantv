@@ -169,6 +169,14 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   and a [Sony KDL-49W800G](https://github.com/Gathin23/cleanyourtv/issues/92). Press Home before
   `screencap`. An empty capture means nothing about the ADB connection or playback; check those
   separately.
+- **Screenshots come out identical instead of empty**, seen on an Amazon Fire TV Stick 4K 2nd gen
+  (AFTKRT, karat, Fire OS 8) right after a reboot: `screencap -p` kept returning the same non-empty
+  PNG byte-for-byte (same MD5) across completely different resumed activities, minutes apart. It
+  looked like a real (black) capture and cost real debugging time before `md5`-comparing two pulls
+  gave it away. `dumpsys SurfaceFlinger --display-id` showed `no identification data` for Display 0
+  at the time. Don't trust a `screencap` pull on its own here: diff it against another pull, or
+  check `dumpsys activity activities | grep mResumedActivity` and real key events
+  (`adb shell getevent -lt`) instead.
 - **The whole UI is huge and clipped, and it is not the launcher**, seen on a Sony K-85XR70
   (`BRAVIA 4K AE2`, Android 14, China firmware,
   [#590](https://github.com/Gathin23/cleanyourtv/issues/590)). Its UI runs at 1920×1080 on a 4K panel
