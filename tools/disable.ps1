@@ -48,46 +48,84 @@ $ErrorActionPreference = 'Stop'
 
 # Home guard (#239), the same check as disable.sh: a list that disables the app owning Home leaves the
 # TV with nothing to start Home with. Skip the owner while nothing else on the TV can answer HOME;
-# `$env:FORCE_HOME=1` disables it anyway, for a TV reachable another way.
-if (-not $env:FORCE_HOME) {
+# `$env:FORCE_HOME=1` disables it anyway, for a TV reachable another way. With no single owner (Android's
+# chooser "android", or a failed/empty answer) the guard fails closed instead of being skipped.
+$tvPy = Join-Path $repo 'tools\tv.py'
+$claimQuery = 'cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
+# The setup wizard and the settings apps answer HOME too, but they are not launchers (disable.sh).
+$notLaunchers = @('com.google.android.tungsten.setupwraith', 'com.android.tv.settings', 'com.android.settings', 'com.android.provision')
+$knownLaunchers = @('com.google.android.tvlauncher', 'com.google.android.apps.tv.launcherx', 'com.google.android.leanbacklauncher', 'com.mitv.tvhome')
+# Usable HOME claimants the TV can start now; Ok is false when the TV could not list any.
+function Read-HomeLaunchers {
+    # Windows PowerShell turns redirected stderr into an error that 'Stop' would throw (see getprop).
+    $ErrorActionPreference = 'Continue'
+    $lines = @(& $py -I $tvPy $claimQuery 2>$null)
+    $answered = $LASTEXITCODE -eq 0
+    # Keep the class: a vendor fallback is named FallbackHome and is not a usable launcher
+    # (TCL Android TV sets register com.tcl.keycustomfunctionservice/.FallbackHome).
+    # Trim first: a trailing CR from the TV would stop the `$` anchor from matching any line.
+    $parsed = @($lines | ForEach-Object {
+        if ("$_".Trim() -match '^([A-Za-z0-9_.]+)/([A-Za-z0-9_.$]+)$') { [pscustomobject]@{ Pkg = $Matches[1]; Cls = $Matches[2] } }
+    })
+    # Nor is a factory-test app (com.duokan.factorytest/.FactoryLauncher answers HOME on a Mi TV 4A).
+    $usable = @($parsed | Where-Object { $_.Cls -notmatch 'FallbackHome$' -and $notLaunchers -notcontains $_.Pkg -and $_.Pkg -notmatch 'factorytest|factory_test|factorymode' } |
+        ForEach-Object { $_.Pkg } | Sort-Object -Unique)
+    [pscustomobject]@{ Ok = ($answered -and $parsed.Count -gt 0); Launchers = $usable }
+}
+if (-not $env:FORCE_HOME -and $pkgs.Count -gt 0) {
     $homeQuery = 'cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
-    $homeLine = @(& $py -I (Join-Path $repo 'tools\tv.py') $homeQuery) |
-        Where-Object { $_ -match '\S' } | Select-Object -Last 1
+    $ErrorActionPreference = 'Continue'
+    $homeLine = @(& $py -I $tvPy $homeQuery 2>$null) | Where-Object { $_ -match '\S' } | Select-Object -Last 1
+    if ($LASTEXITCODE -ne 0) { $homeLine = '' }
+    $ErrorActionPreference = 'Stop'
     $homePkg = "$homeLine".Trim() -split '/' | Select-Object -First 1
     # `cmd` arrived with Android 7 (Nougat): on an older set this query answers nothing, or the shell's
     # own "cmd: not found", and the guard was skipped without a word (disable.sh, #795). `dumpsys
     # activity` prints the package holding Home on those sets: mHomeProcess: ProcessRecord{... pkg/u0a56}
-    $named = $homePkg -and ($homePkg -match '^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$')
-    if (-not $named) {
-        $fallback = @(& $py -I (Join-Path $repo 'tools\tv.py') 'dumpsys activity' | ForEach-Object {
+    $pkgShape = '^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$'
+    if (-not ($homePkg -and ($homePkg -match $pkgShape))) {
+        $ErrorActionPreference = 'Continue'
+        $fallback = @(& $py -I $tvPy 'dumpsys activity' 2>$null | ForEach-Object {
             $line = "$_".Trim()
             if ($line -match 'mHomeProcess:.*[: ]([A-Za-z0-9_.]+)/[A-Za-z0-9_.]+') { $Matches[1] }
         } | Select-Object -First 1)
-        $homePkg = if ($fallback.Count -gt 0) { "$($fallback[0])" } else { '' }
+        $ErrorActionPreference = 'Stop'
+        $homePkg = if ($fallback.Count -gt 0 -and "$($fallback[0])" -match $pkgShape) { "$($fallback[0])" } else { '' }
     }
-    if ($homePkg -and ($pkgs -contains $homePkg)) {
-        # Every package with a HOME activity the TV can start now; a disabled one does not answer.
-        $claimQuery = 'cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.HOME'
-        $claims = @(& $py -I (Join-Path $repo 'tools\tv.py') $claimQuery | ForEach-Object {
-            # Keep the class: a vendor fallback is named FallbackHome and is not a usable launcher
-            # (TCL Android TV sets register com.tcl.keycustomfunctionservice/.FallbackHome).
-            # Trim first: a trailing CR from the TV would stop the `$` anchor from matching any line.
-            if ("$_".Trim() -match '^([A-Za-z0-9_.]+)/([A-Za-z0-9_.$]+)$') {
-                if ($Matches[2] -notmatch 'FallbackHome$') { $Matches[1] }
+    if ($homePkg) {
+        if ($pkgs -contains $homePkg) {
+            $found = Read-HomeLaunchers
+            $others = @(@($found.Launchers) | Where-Object { $_ -ne $homePkg -and $pkgs -notcontains $_ })
+            if (-not $found.Ok -or $others.Count -eq 0) {
+                Write-Warning "Skipping ${homePkg}: it owns Home, and no other app that can answer Home is installed and staying enabled. Make the new launcher Home first (launcher\build-and-install.ps1), then run this list again to disable the old one; or set `$env:FORCE_HOME=1 if you can still reach the TV."
+                $pkgs = @($pkgs | Where-Object { $_ -ne $homePkg })
             }
-        } | Sort-Object -Unique)
-        # The setup wizard and the settings apps answer HOME too, but they are not launchers (disable.sh).
-        $notLaunchers = @('com.google.android.tungsten.setupwraith', 'com.android.tv.settings', 'com.android.settings', 'com.android.provision')
-        # Nor is a factory-test app (com.duokan.factorytest/.FactoryLauncher answers HOME on a Mi TV 4A).
-        $others = @($claims | Where-Object { $_ -ne $homePkg -and $pkgs -notcontains $_ -and $notLaunchers -notcontains $_ -and $_ -notmatch 'factorytest|factory_test|factorymode' })
-        if ($others.Count -eq 0) {
-            Write-Warning "Skipping ${homePkg}: it owns Home, and no other app that can answer Home is installed and staying enabled. Make the new launcher Home first (launcher\build-and-install.ps1), then run this list again to disable the old one; or set `$env:FORCE_HOME=1 if you can still reach the TV."
-            $pkgs = @($pkgs | Where-Object { $_ -ne $homePkg })
+        }
+    } else {
+        # No single owner: Android's chooser ("android", launchers tie), or neither query named one.
+        # Fail closed: judge by the HOME claimants, and without those keep the known stock launchers.
+        $found = Read-HomeLaunchers
+        if ($found.Ok) {
+            $listed = @(@($found.Launchers) | Where-Object { $pkgs -contains $_ })
+            $others = @(@($found.Launchers) | Where-Object { $pkgs -notcontains $_ })
+            if ($listed.Count -gt 0 -and $others.Count -eq 0) {
+                foreach ($p in $listed) {
+                    Write-Warning "Skipping ${p}: Home has no default, and once the list is applied no other app could answer Home. Make the new launcher Home first, or set `$env:FORCE_HOME=1."
+                    $pkgs = @($pkgs | Where-Object { $_ -ne $p })
+                }
+            }
+        } else {
+            foreach ($p in $knownLaunchers) {
+                if ($pkgs -contains $p) {
+                    Write-Warning "Skipping ${p}: could not ask the TV which apps answer Home, and it is a stock launcher. Run again once the TV answers, or set `$env:FORCE_HOME=1 if you can still reach the TV."
+                    $pkgs = @($pkgs | Where-Object { $_ -ne $p })
+                }
+            }
         }
     }
-    # Neither query named Home, so the guard could not run. Say so (disable.sh, #795).
+    # Neither query named Home, so the guard could only go by the apps that answer Home. Say so (disable.sh, #795).
     if (-not $homePkg -and $pkgs.Count -gt 0) {
-        Write-Warning 'Could not tell which app owns Home on this TV, so the Home guard did not run: neither "cmd package resolve-activity" (added in Android 7) nor "dumpsys activity" named one. Check by hand that the list does not hold your launcher before running it: the replacement launcher needs Android 8.0 (minSdk 26), so on an older set the stock launcher is the only Home there is, and a set with no recovery has no way back (#795).'
+        Write-Warning 'Could not tell which app owns Home on this TV, so the Home guard went by the apps that answer Home instead: neither "cmd package resolve-activity" (added in Android 7) nor "dumpsys activity" named one. Check by hand that the list does not hold your launcher before running it: the replacement launcher needs Android 8.0 (minSdk 26), so on an older set the stock launcher is the only Home there is, and a set with no recovery has no way back (#795).'
     }
 }
 # Same as disable.sh (#321): a package that asks for android.permission.TV_INPUT_HARDWARE is the software
