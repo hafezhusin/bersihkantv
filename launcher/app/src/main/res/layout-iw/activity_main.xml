@@ -249,22 +249,12 @@
                         android:orientation="horizontal"
                         android:baselineAligned="true">
                         <TextClock
-                            android:id="@+id/clock"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:format12Hour="h:mm"
-                            android:format24Hour="HH:mm"
-                            android:textColor="#FFFFFFFF"
-                            android:textSize="52sp"
-                            android:fontFamily="@font/outfit_light"
-                            android:letterSpacing="-0.04"
-                            android:includeFontPadding="false" />
-
-                        <TextClock
                             android:id="@+id/ampm"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
+                            android:layout_marginEnd="6dp"
+                            android:singleLine="true"
+                            android:textDirection="rtl"
                             android:layout_gravity="bottom"
                             android:layout_marginBottom="8dp"
                             android:format12Hour="a"
@@ -272,8 +262,22 @@
                             android:textColor="#B3FFFFFF"
                             android:textSize="15sp"
                             android:fontFamily="@font/outfit_medium"
-                            android:letterSpacing="0.08"
+                            android:letterSpacing="0"
+                            android:ellipsize="none"
                             android:textAllCaps="true" />
+
+                        <TextClock
+                            android:id="@+id/clock"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="6dp"
+                            android:format12Hour="h:mm"
+                            android:format24Hour="HH:mm"
+                            android:textColor="#FFFFFFFF"
+                            android:textSize="52sp"
+                            android:fontFamily="@font/outfit_light"
+                            android:letterSpacing="-0.04"
+                            android:includeFontPadding="false" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -286,7 +290,10 @@
                 android:layout_width="wrap_content"
                 android:layout_below="@id/leftBlock"
                 android:layout_alignStart="@id/leftBlock"
+                android:layout_alignEnd="@id/leftBlock"
                 android:gravity="right"
+                android:textDirection="rtl"
+                android:layout_marginEnd="6dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:singleLine="true"
