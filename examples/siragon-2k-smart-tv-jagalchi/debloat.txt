@@ -1,0 +1,50 @@
+# SIRAGON 2K SMART TV (built by KTC, codename jagalchi, product KTC_SIRAGON_2K_25GV1, MediaTek mt5867 / T56),
+# Google TV 14 (API 34), firmware UKN6.260116.064, UI at 1280x720.
+# Fingerprint: FPD/FPD_2KEI1/jagalchi:14/UKN6.260116.064/15192348:user/release-keys
+#
+# Apply:   TV_HOST=<tv ip> tools/disable.sh examples/siragon-2k-smart-tv-jagalchi/debloat.txt
+# Undo:    TV_HOST=<tv ip> tools/restore.sh examples/siragon-2k-smart-tv-jagalchi/debloat.txt com.google.android.apps.tv.launcherx
+# Everything is DISABLED, not uninstalled. Comment out any line you want to keep.
+#
+# Stock launcher: com.google.android.apps.tv.launcherx (pass it to restore.sh as above).
+# Live TV: com.mediatek.wwtv.tvcenter (TurnkeyUiMainActivity).
+# TV inputs: com.mediatek.tvinput.
+# ODM manufacturer: Shenzhen KTC Technology (KTC).
+#
+# KEEP, even though the names look like bloat:
+# - com.ktc.tv.factory, ktc.factorymenu.ui, mediatek.factorymenu.ui: do not open or touch; factory modes.
+# - com.mediatek.wwtv.setupwizard: remote pairing and key handlers.
+# - com.mediatek.autopair, com.mediatek.tv.service, com.mediatek.tvinput, globalkeyoverlay packages.
+#
+# Notes from this TV:
+# - Wi-Fi was saved by android.uid.system / com.android.tv.settings, so setupwraith can be disabled safely.
+# - setupwraith claims HOME (RecoveryActivity); must be disabled before launcher handover.
+# - Chromecast built-in (com.google.android.apps.mediashell) remains fully functional on Android 14.
+# - Verified working with screenshots and D-pad remote navigation.
+
+# Batch 1: telemetry, ads and vendor bloat
+tv.anoki.acr.anokiacroptin              # Anoki content-recognition ACR tracking
+com.android.tv.feedbackconsent
+com.google.android.feedback
+com.android.settings.intelligence
+com.android.ondevicepersonalization.services
+com.android.federatedcompute.services
+com.android.adservices.api              # Android Privacy Sandbox / ad services
+
+# Batch 2: factory utilities and store demos
+fusion.android.tv.demo                  # Retail store demo mode
+com.electronic.manual                   # Electronic user manual
+com.ktc.serialport                      # Serial port debug service
+com.mediatek.android.leanbacklauncher.partnercustomizer
+com.mstar.android.tv.disclaimercustomization
+
+# Batch 3: unused apps and services (by user choice)
+com.google.android.katniss              # Google Assistant / voice search
+com.google.android.tts                  # Text-to-speech engine
+com.google.android.play.games           # Google Play Games
+com.google.android.marvin.talkback      # TalkBack accessibility
+com.google.android.apps.tv.dreamx       # Ambient screensaver
+com.netflix.tokenmanager
+
+# Batch 4: setup wizard claiming HOME
+com.google.android.tungsten.setupwraith # Disables RecoveryActivity claiming HOME
